@@ -60,11 +60,13 @@ function pdfLine(float $x1, float $y1, float $x2, float $y2, float $width = 0.5)
 }
 
 /**
- * Generate bill number from sale id.
+ * Generate bill number from sale id (if not already defined in helpers).
  */
-function makeBillNo(int $saleId): string
-{
-    return 'INV-' . str_pad((string)$saleId, 5, '0', STR_PAD_LEFT);
+if (!function_exists('makeBillNo')) {
+    function makeBillNo(int $saleId): string
+    {
+        return 'INV-' . str_pad((string)$saleId, 5, '0', STR_PAD_LEFT);
+    }
 }
 
 /**
