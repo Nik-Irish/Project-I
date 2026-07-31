@@ -44,9 +44,16 @@ function checkProductCountNotification(PDO $pdo, int $count): void {
  $sales         = $pdo->query('SELECT * FROM sales ORDER BY sale_date DESC, created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
  $movements     = $pdo->query('SELECT * FROM movements ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
  $notifications = $pdo->query('SELECT * FROM notifications ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
+
+ /* ===== CHANGE #3: fetch staff accounts, placed right after $notifications ===== */
+ $staffUsers = $pdo->query("SELECT id,username,created_at FROM users WHERE role='staff' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+ /* ===== END CHANGE #3 ===== */
+
  $editProduct = null; $detailProduct = null;
 
- $allowedViews = ['list','add','edit','sales','sale_add','inventory','report','notifications','bill'];
+ /* ===== CHANGE #1: 'staff' added to allowed views ===== */
+ $allowedViews = ['list','add','edit','sales','sale_add','inventory','report','notifications','bill','staff'];
+ /* ===== END CHANGE #1 ===== */
  $view = $_GET['view'] ?? 'list';
 if (!in_array($view, $allowedViews, true)) $view = 'list';
 
@@ -233,10 +240,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete_notification') { $pdo->prepare('DELETE FROM notifications WHERE id=?')->execute([(int)($_POST['id']??0)]); $successMessage='Removed.'; $view='notifications'; }
     if ($action === 'clear_notifications') { $pdo->exec('DELETE FROM notifications'); $successMessage='All cleared.'; $view='notifications'; }
 
+    /* ===== CHANGE #2: staff management POST handlers — placed right after clear_notifications, before the reload queries below ===== */
+    if ($action === 'staff_update') {
+        $id = (int)($_POST['id'] ?? 0);
+        $newUser = trim($_POST['username'] ?? '');
+        $newPass = trim($_POST['password'] ?? '');
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id=? AND role='staff'"); $stmt->execute([$id]);
+        $staff = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$staff) { $errorMessage = 'Staff not found.'; $view = 'staff'; }
+        elseif (!preg_match('/^[a-zA-Z0-9]{3,15}$/', $newUser)) { $errorMessage = 'Username: 3-15 chars, letters & numbers.'; $view = 'staff'; }
+        else {
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username=? AND id!=?'); $stmt->execute([$newUser,$id]);
+            if ($stmt->fetchColumn() > 0) { $errorMessage = 'Username already taken.'; $view = 'staff'; }
+            elseif ($newPass !== '' && !preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $newPass)) { $errorMessage = 'Password: 8+ chars, upper, lower, number, special char.'; $view = 'staff'; }
+            else {
+                if ($newPass !== '') {
+                    $pdo->prepare('UPDATE users SET username=?,password_hash=? WHERE id=?')->execute([$newUser, password_hash($newPass, PASSWORD_DEFAULT), $id]);
+                } else {
+                    $pdo->prepare('UPDATE users SET username=? WHERE id=?')->execute([$newUser, $id]);
+                }
+                $successMessage = 'Staff account updated.'; $view = 'staff';
+            }
+        }
+    }
+
+    if ($action === 'staff_delete') {
+        $id = (int)($_POST['id'] ?? 0);
+        $stmt = $pdo->prepare("SELECT username FROM users WHERE id=? AND role='staff'"); $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) { $errorMessage = 'Staff not found.'; }
+        else { $pdo->prepare('DELETE FROM users WHERE id=?')->execute([$id]); $successMessage = 'Staff "'.$row['username'].'" deleted.'; }
+        $view = 'staff';
+    }
+    /* ===== END CHANGE #2 ===== */
+
     $products = $pdo->query('SELECT * FROM products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
     $sales = $pdo->query('SELECT * FROM sales ORDER BY sale_date DESC, created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
     $movements = $pdo->query('SELECT * FROM movements ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
     $notifications = $pdo->query('SELECT * FROM notifications ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
+    $staffUsers = $pdo->query("SELECT id,username,created_at FROM users WHERE role='staff' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
     if ($view === 'inventory' && $detailProduct) { $stmt=$pdo->prepare('SELECT * FROM products WHERE id=?'); $stmt->execute([(int)$detailProduct['id']]); $detailProduct=$stmt->fetch(PDO::FETCH_ASSOC); if (!$detailProduct) { $view='list'; $errorMessage=$errorMessage?:'Product not found.'; } }
     if ($view === 'bill' && $billSale) { $stmt=$pdo->prepare('SELECT * FROM sales WHERE id=?'); $stmt->execute([(int)$billSale['id']]); $fresh=$stmt->fetch(PDO::FETCH_ASSOC); if($fresh){$fresh['_subtotal']=$billSale['_subtotal']??0;$fresh['_tax']=$billSale['_tax']??0;$fresh['_total']=$billSale['_total']??0;$billSale=$fresh;} }
 }
@@ -288,9 +330,11 @@ if ($view === 'inventory' && $detailProduct) {
  $totalProducts = (int)$statsRow['cnt']; $totalStock = (int)$statsRow['total_stock'];
  $totalValue = (float)$statsRow['total_value']; $lowStockCount = (int)$statsRow['low_cnt'];
 
- $pageTitles = ['list'=>'Products','add'=>'Add Product','edit'=>'Modify Product','sales'=>'Sales Report','sale_add'=>'Record Sale','inventory'=>'Inventory Details','report'=>'Sales Summary','notifications'=>'Notifications','bill'=>'Bill'];
+ /* ===== CHANGE #5: page titles / subtitles — 'staff' entry added to both arrays ===== */
+ $pageTitles = ['list'=>'Products','add'=>'Add Product','edit'=>'Modify Product','sales'=>'Sales Report','sale_add'=>'Record Sale','inventory'=>'Inventory Details','report'=>'Sales Summary','notifications'=>'Notifications','bill'=>'Bill','staff'=>'Manage Staff'];
  $pageTitle = $pageTitles[$view] ?? 'Dashboard';
- $pageSub = ['list'=>'Manage products and stock','add'=>'Add a new product','edit'=>'Update product details','sales'=>'View all sales','sale_add'=>'Record a sale','inventory'=>'Stock history for one product','report'=>'Sales totals','notifications'=>'System alerts','bill'=>'View bill'];
+ $pageSub = ['list'=>'Manage products and stock','add'=>'Add a new product','edit'=>'Update product details','sales'=>'View all sales','sale_add'=>'Record a sale','inventory'=>'Stock history for one product','report'=>'Sales totals','notifications'=>'System alerts','bill'=>'View bill','staff'=>'Edit or remove staff accounts'];
+ /* ===== END CHANGE #5 ===== */
 
  $unreadNotifications = (int)$pdo->query('SELECT COUNT(*) FROM notifications WHERE is_read=0')->fetchColumn();
  $sortedNotifications = $notifications;
@@ -331,6 +375,9 @@ if ($view === 'inventory' && $detailProduct) {
             <a href="dashboard.php?view=sale_add" class="nav-link <?php echo $view==='sale_add'?'active':''; ?>">🛒 Record Sale</a>
             <a href="dashboard.php?view=sales" class="nav-link <?php echo $view==='sales'?'active':''; ?>">📊 Sales Report</a>
             <a href="dashboard.php?view=report" class="nav-link <?php echo $view==='report'?'active':''; ?>">📈 Sales Summary</a>
+            <!-- ===== CHANGE #4: Manage Staff sidebar link ===== -->
+            <a href="dashboard.php?view=staff" class="nav-link <?php echo $view==='staff'?'active':''; ?>">👷 Manage Staff</a>
+            <!-- ===== END CHANGE #4 ===== -->
             <a href="dashboard.php?view=notifications" class="nav-link <?php echo $view==='notifications'?'active':''; ?>">🔔 Notifications <?php if ($unreadNotifications>0): ?><span class="nav-badge"><?php echo $unreadNotifications; ?></span><?php endif; ?></a>
         </nav>
         <div class="sidebar-footer"><a href="login.php" class="nav-link logout">← Logout</a></div>
@@ -669,6 +716,46 @@ if ($view === 'inventory' && $detailProduct) {
         <a href="dashboard.php?view=list" class="btn btn-ghost">Back to Products</a>
     </div>
 </div>
+
+        <!-- ═══════ MANAGE STAFF ═══════ -->
+        <!-- ===== CHANGE #6: entire staff management view block ===== -->
+        <?php elseif ($view==='staff'): ?>
+        <div class="table-wrap">
+            <?php if (empty($staffUsers)): ?>
+            <div class="empty-state"><p>No staff accounts yet. Staff can register at the login page.</p></div>
+            <?php else: ?>
+            <table class="data-table">
+                <thead><tr><th>ID</th><th>Username</th><th>Created</th><th>Change Credentials</th><th>Actions</th></tr></thead>
+                <tbody>
+                <?php foreach ($staffUsers as $st): ?>
+                <tr>
+                    <td><?php echo (int)$st['id']; ?></td>
+                    <td><?php echo htmlspecialchars($st['username']); ?></td>
+                    <td><?php echo htmlspecialchars($st['created_at']); ?></td>
+                    <td>
+                        <form method="POST" action="dashboard.php?view=staff" class="inline-form">
+                            <input type="hidden" name="action" value="staff_update">
+                            <input type="hidden" name="id" value="<?php echo (int)$st['id']; ?>">
+                            <input type="text" name="username" value="<?php echo htmlspecialchars($st['username']); ?>" class="qty-input" style="width:110px" required>
+                            <input type="password" name="password" placeholder="New password (optional)" style="width:170px">
+                            <button type="submit" class="btn btn-sm btn-secondary">Save</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this staff account?');">
+                            <input type="hidden" name="action" value="staff_delete">
+                            <input type="hidden" name="id" value="<?php echo (int)$st['id']; ?>">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+            <p style="margin-top:.75rem;font-size:.8rem;color:#64748b">Leave the password field blank to keep the current password. New passwords need 8+ chars with uppercase, lowercase, a number, and a special character.</p>
+            <?php endif; ?>
+        </div>
+        <!-- ===== END CHANGE #6 ===== -->
 
         <!-- ═══════ NOTIFICATIONS ═══════ -->
         <?php elseif ($view==='notifications'): ?>
