@@ -1,13 +1,9 @@
 <?php
 session_start();
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header('Location: login.php'); exit; }
 require_once __DIR__ . '/pdf_invoice.php';
 
- $dbHost = 'localhost';
- $dbPort = 3306;
- $dbUser = 'root';
- $dbPass = '';
- $dbName = 'ims';
-
+ $dbHost = 'localhost'; $dbPort = 3306; $dbUser = 'root'; $dbPass = ''; $dbName = 'ims';
 try {
     $pdo = new PDO("mysql:host=$dbHost;port=$dbPort;charset=utf8mb4", $dbUser, $dbPass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -19,33 +15,22 @@ try {
 
 define('LOW_STOCK_THRESHOLD', 10);
 define('PRODUCT_COUNT_ALERT', 10);
+define('TAX_RATE', 0.13);
 
-/* ── Helpers ── */
 function shortText(string $text, int $max = 48): string {
     return strlen($text) <= $max ? $text : substr($text, 0, $max - 1) . '…';
 }
-
 function logMovement(PDO $pdo, int $pid, string $type, int $amt, int $bal, string $note = ''): void {
     $pdo->prepare('INSERT INTO movements (product_id,type,amount,balance_after,note) VALUES (?,?,?,?,?)')->execute([$pid,$type,$amt,$bal,$note]);
 }
-
 function addNotification(PDO $pdo, string $type, string $title, string $msg, ?int $pid = null): void {
     $pdo->prepare('INSERT INTO notifications (type,title,message,product_id,is_read) VALUES (?,?,?,?,0)')->execute([$type,$title,$msg,$pid]);
 }
-
 function checkStockNotification(PDO $pdo, array $product, int $old, int $new): void {
-    $name = $product['name'] ?? 'Product';
-    $sku  = $product['sku'] ?? '';
-    $id   = (int)($product['id'] ?? 0);
-    if ($new === 0 && $old > 0) {
-        addNotification($pdo,'out_of_stock','Out of stock','"'.$name.'" (Product ID: '.$sku.') is out of stock. Please restock.',$id);
-        return;
-    }
-    if ($new > 0 && $new <= LOW_STOCK_THRESHOLD && $old > LOW_STOCK_THRESHOLD) {
-        addNotification($pdo,'low_stock','Low stock alert','"'.$name.'" (Product ID: '.$sku.') has only '.$new.' unit(s) left.',$id);
-    }
+    $name = $product['name'] ?? 'Product'; $sku = $product['sku'] ?? ''; $id = (int)($product['id'] ?? 0);
+    if ($new === 0 && $old > 0) { addNotification($pdo,'out_of_stock','Out of stock','"'.$name.'" (Product-ID: '.$sku.') is out of stock. Please restock.',$id); return; }
+    if ($new > 0 && $new <= LOW_STOCK_THRESHOLD && $old > LOW_STOCK_THRESHOLD) { addNotification($pdo,'low_stock','Low stock alert','"'.$name.'" (Product-ID: '.$sku.') has only '.$new.' unit(s) left.',$id); }
 }
-
 function checkProductCountNotification(PDO $pdo, int $count): void {
     if ($count !== PRODUCT_COUNT_ALERT) return;
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE type='product_count' AND message LIKE ?");
@@ -54,7 +39,6 @@ function checkProductCountNotification(PDO $pdo, int $count): void {
     addNotification($pdo,'product_count','Product catalog milestone','The system now has '.PRODUCT_COUNT_ALERT.' products registered.',null);
 }
 
-/* ── Load data ── */
  $errorMessage = ''; $successMessage = '';
  $products      = $pdo->query('SELECT * FROM products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
  $sales         = $pdo->query('SELECT * FROM sales ORDER BY sale_date DESC, created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
@@ -66,7 +50,6 @@ function checkProductCountNotification(PDO $pdo, int $count): void {
  $view = $_GET['view'] ?? 'list';
 if (!in_array($view, $allowedViews, true)) $view = 'list';
 
-/* PDF download */
 if (isset($_GET['download']) && $_GET['download'] === 'pdf' && isset($_GET['sale_id'])) {
     $stmt = $pdo->prepare('SELECT * FROM sales WHERE id=?'); $stmt->execute([(int)$_GET['sale_id']]);
     $dl = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -91,7 +74,6 @@ if ($view === 'inventory' && isset($_GET['id'])) {
     if (!$detailProduct) { $errorMessage = 'Product not found.'; $view = 'list'; }
 }
 
-/* ── POST handlers ── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -99,13 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? ''); $sku = trim($_POST['sku'] ?? '');
         $cat = trim($_POST['category'] ?? ''); $price = trim($_POST['price'] ?? '');
         $qty = trim($_POST['quantity'] ?? ''); $desc = trim($_POST['description'] ?? '');
-
-        if ($name === '' || $sku === '' || $price === '' || $qty === '') { $errorMessage = 'Name, Product ID, price, and quantity are required.'; $view = 'add'; }
+        if ($name === '' || $sku === '' || $price === '' || $qty === '') { $errorMessage = 'Name, Product-ID, price, and quantity are required.'; $view = 'add'; }
         elseif (!is_numeric($price) || (float)$price < 0) { $errorMessage = 'Price must be valid.'; $view = 'add'; }
         elseif (!preg_match('/^\d+$/', $qty)) { $errorMessage = 'Quantity must be a whole number.'; $view = 'add'; }
         else {
             $stmt = $pdo->prepare('SELECT COUNT(*) FROM products WHERE sku=?'); $stmt->execute([$sku]);
-            if ($stmt->fetchColumn() > 0) { $errorMessage = 'This Product ID already exists.'; $view = 'add'; }
+            if ($stmt->fetchColumn() > 0) { $errorMessage = 'This Product-ID already exists.'; $view = 'add'; }
             else {
                 $q = (int)$qty; $c = $cat !== '' ? $cat : 'General';
                 $pdo->prepare('INSERT INTO products (name,sku,category,price,quantity,description) VALUES (?,?,?,?,?,?)')->execute([$name,$sku,$c,round((float)$price,2),$q,$desc]);
@@ -129,12 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare('SELECT * FROM products WHERE id=?'); $stmt->execute([$id]);
         $editProduct = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$editProduct) { $errorMessage = 'Product not found.'; $view = 'list'; }
-        elseif ($name === '' || $sku === '' || $price === '' || $qty === '') { $errorMessage = 'Name, Product ID, price, and quantity are required.'; $view = 'edit'; }
+        elseif ($name === '' || $sku === '' || $price === '' || $qty === '') { $errorMessage = 'Name, Product-ID, price, and quantity are required.'; $view = 'edit'; }
         elseif (!is_numeric($price) || (float)$price < 0) { $errorMessage = 'Price must be valid.'; $view = 'edit'; }
         elseif (!preg_match('/^\d+$/', $qty)) { $errorMessage = 'Quantity must be a whole number.'; $view = 'edit'; }
         else {
             $stmt = $pdo->prepare('SELECT COUNT(*) FROM products WHERE sku=? AND id!=?'); $stmt->execute([$sku,$id]);
-            if ($stmt->fetchColumn() > 0) { $errorMessage = 'This Product ID already exists.'; $view = 'edit'; }
+            if ($stmt->fetchColumn() > 0) { $errorMessage = 'This Product-ID already exists.'; $view = 'edit'; }
             else {
                 $oldQty = (int)$editProduct['quantity']; $newQty = (int)$qty;
                 $c = $cat !== '' ? $cat : 'General';
@@ -207,7 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         elseif ($up === '' || !is_numeric($up) || (float)$up < 0) { $errorMessage = 'Enter valid unit price.'; $view = 'sale_add'; }
         elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sd)) { $errorMessage = 'Enter valid date (YYYY-MM-DD).'; $view = 'sale_add'; }
         else {
-            $qi = (int)$qty; $pf = round((float)$up,2); $total = round($pf*$qi,2);
+            $qi = (int)$qty; $pf = round((float)$up,2);
+            $subtotal = round($pf*$qi,2);
+            $taxAmt = round($subtotal*TAX_RATE,2);
+            $total = round($subtotal+$taxAmt,2);
             $oldQ = (int)$p['quantity']; $newQ = $oldQ - $qi;
             $custN = $cn !== '' ? $cn : 'Walk-in Customer';
             $status = $pdo->query("SHOW TABLE STATUS LIKE 'sales'")->fetch(PDO::FETCH_ASSOC);
@@ -222,6 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             checkStockNotification($pdo,$stmt->fetch(PDO::FETCH_ASSOC),$oldQ,$newQ);
             $stmt = $pdo->prepare('SELECT * FROM sales WHERE id=?'); $stmt->execute([$saleId]);
             $billSale = $stmt->fetch(PDO::FETCH_ASSOC);
+            $billSale['_subtotal']=$subtotal;
+            $billSale['_tax']=$taxAmt;
+            $billSale['_total']=$total;
             $successMessage = 'Sale recorded. Bill '.$billNo.' generated.'; $view = 'bill';
         }
     }
@@ -246,16 +233,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete_notification') { $pdo->prepare('DELETE FROM notifications WHERE id=?')->execute([(int)($_POST['id']??0)]); $successMessage='Removed.'; $view='notifications'; }
     if ($action === 'clear_notifications') { $pdo->exec('DELETE FROM notifications'); $successMessage='All cleared.'; $view='notifications'; }
 
-    /* Reload data */
     $products = $pdo->query('SELECT * FROM products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
     $sales = $pdo->query('SELECT * FROM sales ORDER BY sale_date DESC, created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
     $movements = $pdo->query('SELECT * FROM movements ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
     $notifications = $pdo->query('SELECT * FROM notifications ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
     if ($view === 'inventory' && $detailProduct) { $stmt=$pdo->prepare('SELECT * FROM products WHERE id=?'); $stmt->execute([(int)$detailProduct['id']]); $detailProduct=$stmt->fetch(PDO::FETCH_ASSOC); if (!$detailProduct) { $view='list'; $errorMessage=$errorMessage?:'Product not found.'; } }
-    if ($view === 'bill' && $billSale) { $stmt=$pdo->prepare('SELECT * FROM sales WHERE id=?'); $stmt->execute([(int)$billSale['id']]); $billSale=$stmt->fetch(PDO::FETCH_ASSOC)?:$billSale; }
+    if ($view === 'bill' && $billSale) { $stmt=$pdo->prepare('SELECT * FROM sales WHERE id=?'); $stmt->execute([(int)$billSale['id']]); $fresh=$stmt->fetch(PDO::FETCH_ASSOC); if($fresh){$fresh['_subtotal']=$billSale['_subtotal']??0;$fresh['_tax']=$billSale['_tax']??0;$fresh['_total']=$billSale['_total']??0;$billSale=$fresh;} }
 }
 
-/* ── Filters ── */
  $search = trim($_GET['q'] ?? '');
 if ($search !== '' && $view === 'list') {
     $stmt = $pdo->prepare("SELECT * FROM products WHERE CONCAT(name,' ',sku,' ',category,' ',COALESCE(description,'')) LIKE ? ORDER BY id");
@@ -303,9 +288,9 @@ if ($view === 'inventory' && $detailProduct) {
  $totalProducts = (int)$statsRow['cnt']; $totalStock = (int)$statsRow['total_stock'];
  $totalValue = (float)$statsRow['total_value']; $lowStockCount = (int)$statsRow['low_cnt'];
 
- $pageTitles = ['list'=>'Products','add'=>'Add Product','edit'=>'Modify Product','sales'=>'Sales Report','sale_add'=>'Record Sale','inventory'=>'Inventory Details','report'=>'Sales Summary','notifications'=>'Notifications','bill'=>'Invoice'];
+ $pageTitles = ['list'=>'Products','add'=>'Add Product','edit'=>'Modify Product','sales'=>'Sales Report','sale_add'=>'Record Sale','inventory'=>'Inventory Details','report'=>'Sales Summary','notifications'=>'Notifications','bill'=>'Bill'];
  $pageTitle = $pageTitles[$view] ?? 'Dashboard';
- $pageSub = ['list'=>'Manage products and stock','add'=>'Add a new product','edit'=>'Update product details','sales'=>'View all sales','sale_add'=>'Record a sale','inventory'=>'Stock history for one product','report'=>'Sales totals','notifications'=>'System alerts','bill'=>'View invoice'];
+ $pageSub = ['list'=>'Manage products and stock','add'=>'Add a new product','edit'=>'Update product details','sales'=>'View all sales','sale_add'=>'Record a sale','inventory'=>'Stock history for one product','report'=>'Sales totals','notifications'=>'System alerts','bill'=>'View bill'];
 
  $unreadNotifications = (int)$pdo->query('SELECT COUNT(*) FROM notifications WHERE is_read=0')->fetchColumn();
  $sortedNotifications = $notifications;
@@ -316,13 +301,30 @@ if ($view === 'inventory' && $detailProduct) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($pageTitle); ?> | IMS</title>
+    <title><?php echo htmlspecialchars($pageTitle); ?> | Nirman</title>
     <link rel="stylesheet" href="dashboard-style.css">
+    <style>
+    .bill-print{max-width:700px;margin:0 auto;background:#fff;color:#111;padding:2rem;border-radius:10px;font-family:'Segoe UI',sans-serif;}
+    .bill-print h1{text-align:center;font-size:2rem;margin:0;color:#1e293b;}
+    .bill-print .bill-title{text-align:center;font-size:1.3rem;font-weight:700;letter-spacing:2px;margin:.3rem 0 .1rem;color:#334155;}
+    .bill-print .bill-company-info{text-align:center;font-size:.82rem;color:#64748b;margin-bottom:1rem;}
+    .bill-print .bill-divider{border:none;border-top:2px solid #334155;margin:.7rem 0;}
+    .bill-print .bill-meta-row{display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:.5rem;}
+    .bill-print table{width:100%;border-collapse:collapse;margin-top:.7rem;}
+    .bill-print th{background:#1e293b;color:#fff;padding:.5rem .7rem;text-align:left;font-size:.85rem;}
+    .bill-print td{padding:.45rem .7rem;border-bottom:1px solid #e2e8f0;font-size:.88rem;}
+    .bill-print .bill-totals{margin-top:.5rem;text-align:right;}
+    .bill-print .bill-totals table{width:auto;margin-left:auto;}
+    .bill-print .bill-totals td{border:none;padding:.2rem .5rem;}
+    .bill-print .grand-total td{font-size:1.1rem;font-weight:700;border-top:2px solid #334155;}
+    .bill-print .bill-footer{text-align:center;margin-top:1.2rem;font-size:.78rem;color:#94a3b8;}
+    @media print{.no-print{display:none!important;}.bill-print{box-shadow:none;}}
+    </style>
 </head>
 <body>
 <div class="app">
     <aside class="sidebar">
-        <div class="brand"><span class="brand-icon">📦</span><span>IMS Nepal</span></div>
+        <div class="brand"><span class="brand-icon">📦</span><span>Nirman</span></div>
         <nav class="nav">
             <a href="dashboard.php?view=list" class="nav-link <?php echo $view==='list'?'active':''; ?>">📋 Products</a>
             <a href="dashboard.php?view=add" class="nav-link <?php echo $view==='add'?'active':''; ?>">➕ Add Product</a>
@@ -382,7 +384,7 @@ if ($view === 'inventory' && $detailProduct) {
             <div class="empty-state"><p>No products found.</p><a href="dashboard.php?view=add" class="btn btn-primary">Add first product</a></div>
             <?php else: ?>
             <table class="data-table">
-                <thead><tr><th>ID</th><th>Name</th><th>Product ID</th><th>Category</th><th>Price</th><th>Stock</th><th>In / Out</th><th>Actions</th></tr></thead>
+                <thead><tr><th>ID</th><th>Name</th><th>Product-ID</th><th>Category</th><th>Price</th><th>Stock</th><th>In / Out</th><th>Actions</th></tr></thead>
                 <tbody>
                 <?php foreach ($filtered as $p): ?>
                 <tr>
@@ -417,7 +419,7 @@ if ($view === 'inventory' && $detailProduct) {
                 <input type="hidden" name="action" value="add">
                 <div class="form-grid">
                     <div class="form-group"><label>Product Name <span class="req">*</span></label><input type="text" name="name" required value="<?php echo htmlspecialchars($_POST['name']??''); ?>"></div>
-                    <div class="form-group"><label>Product ID <span class="req">*</span></label><input type="text" name="sku" required value="<?php echo htmlspecialchars($_POST['sku']??''); ?>"></div>
+                    <div class="form-group"><label>Product-ID <span class="req">*</span></label><input type="text" name="sku" required value="<?php echo htmlspecialchars($_POST['sku']??''); ?>"></div>
                     <div class="form-group"><label>Category</label><input type="text" name="category" value="<?php echo htmlspecialchars($_POST['category']??''); ?>"></div>
                     <div class="form-group"><label>Price (Rs.) <span class="req">*</span></label><input type="number" name="price" step="0.01" min="0" required value="<?php echo htmlspecialchars($_POST['price']??''); ?>"></div>
                     <div class="form-group"><label>Initial Quantity <span class="req">*</span></label><input type="number" name="quantity" min="0" step="1" required value="<?php echo htmlspecialchars($_POST['quantity']??'0'); ?>"></div>
@@ -435,7 +437,7 @@ if ($view === 'inventory' && $detailProduct) {
                 <input type="hidden" name="action" value="update"><input type="hidden" name="id" value="<?php echo (int)$editProduct['id']; ?>">
                 <div class="form-grid">
                     <div class="form-group"><label>Product Name <span class="req">*</span></label><input type="text" name="name" required value="<?php echo htmlspecialchars($editProduct['name']); ?>"></div>
-                    <div class="form-group"><label>Product ID <span class="req">*</span></label><input type="text" name="sku" required value="<?php echo htmlspecialchars($editProduct['sku']); ?>"></div>
+                    <div class="form-group"><label>Product-ID <span class="req">*</span></label><input type="text" name="sku" required value="<?php echo htmlspecialchars($editProduct['sku']); ?>"></div>
                     <div class="form-group"><label>Category</label><input type="text" name="category" value="<?php echo htmlspecialchars($editProduct['category']); ?>"></div>
                     <div class="form-group"><label>Price (Rs.) <span class="req">*</span></label><input type="number" name="price" step="0.01" min="0" required value="<?php echo htmlspecialchars((string)$editProduct['price']); ?>"></div>
                     <div class="form-group"><label>Quantity <span class="req">*</span></label><input type="number" name="quantity" min="0" step="1" required value="<?php echo htmlspecialchars((string)$editProduct['quantity']); ?>"></div>
@@ -448,7 +450,7 @@ if ($view === 'inventory' && $detailProduct) {
         <!-- ═══════ RECORD SALE ═══════ -->
         <?php elseif ($view==='sale_add'): ?>
         <div class="form-card">
-            <h2>Record Sale</h2><p class="form-hint">Selling reduces stock and generates a bill.</p>
+            <h2>Record Sale</h2><p class="form-hint">Selling reduces stock and generates a bill. 13% VAT will be added.</p>
             <?php if (empty($products)): ?>
             <div class="empty-state"><p>Add products first.</p><a href="dashboard.php?view=add" class="btn btn-primary">Add Product</a></div>
             <?php else: ?>
@@ -461,7 +463,7 @@ if ($view === 'inventory' && $detailProduct) {
                         <select id="product_id" name="product_id" required>
                             <option value="">— Select product —</option>
                             <?php foreach ($products as $p): ?>
-                            <option value="<?php echo (int)$p['id']; ?>" data-price="<?php echo (float)$p['price']; ?>" data-stock="<?php echo (int)$p['quantity']; ?>"><?php echo htmlspecialchars($p['name'].' (ID: '.$p['sku'].') — Stock: '.$p['quantity']); ?></option>
+                            <option value="<?php echo (int)$p['id']; ?>" data-price="<?php echo (float)$p['price']; ?>" data-stock="<?php echo (int)$p['quantity']; ?>"><?php echo htmlspecialchars($p['name'].' (Product-ID: '.$p['sku'].') — Stock: '.$p['quantity']); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -470,13 +472,33 @@ if ($view === 'inventory' && $detailProduct) {
                     <div class="form-group"><label>Sale Date</label><input type="date" name="sale_date" value="<?php echo htmlspecialchars($_POST['sale_date']??date('Y-m-d')); ?>"></div>
                     <div class="form-group"><label>Note</label><input type="text" name="note" value="<?php echo htmlspecialchars($_POST['note']??''); ?>" placeholder="Optional"></div>
                 </div>
+                <div id="tax-preview" style="background:rgba(30,41,59,.6);border:1px solid #334155;border-radius:8px;padding:.8rem 1rem;margin:.5rem 0 1rem;font-size:.88rem;display:none;">
+                    <span>Subtotal: <strong id="prev-sub">—</strong></span> &nbsp;|&nbsp;
+                    <span>VAT 13%: <strong id="prev-tax">—</strong></span> &nbsp;|&nbsp;
+                    <span>Total: <strong id="prev-total">—</strong></span>
+                </div>
                 <div class="form-actions"><a href="dashboard.php?view=sales" class="btn btn-ghost">Cancel</a><button type="submit" class="btn btn-primary">Record Sale</button></div>
             </form>
             <script>
-                document.getElementById('product_id').addEventListener('change', function() {
-                    var opt = this.options[this.selectedIndex];
-                    if (opt.value) { document.getElementById('unit_price').value = opt.dataset.price||''; document.getElementById('quantity').max = opt.dataset.stock||''; }
-                });
+            (function(){
+                var sel=document.getElementById('product_id');
+                var upEl=document.getElementById('unit_price');
+                var qEl=document.getElementById('quantity');
+                var prev=document.getElementById('tax-preview');
+                function fmt(n){return'Rs.'+parseFloat(n).toFixed(2);}
+                function updatePreview(){
+                    var p=parseFloat(upEl.value)||0;var q=parseInt(qEl.value)||0;
+                    if(p>0&&q>0){var sub=p*q;var tax=sub*0.13;var tot=sub+tax;
+                        document.getElementById('prev-sub').textContent=fmt(sub);
+                        document.getElementById('prev-tax').textContent=fmt(tax);
+                        document.getElementById('prev-total').textContent=fmt(tot);
+                        prev.style.display='block';
+                    }else{prev.style.display='none';}
+                }
+                sel.addEventListener('change',function(){var o=this.options[this.selectedIndex];if(o.value){upEl.value=o.dataset.price||'';qEl.max=o.dataset.stock||'';}updatePreview();});
+                upEl.addEventListener('input',updatePreview);
+                qEl.addEventListener('input',updatePreview);
+            })();
             </script>
             <?php endif; ?>
         </div>
@@ -499,7 +521,7 @@ if ($view === 'inventory' && $detailProduct) {
             <div class="empty-state"><p>No sales found.</p></div>
             <?php else: ?>
             <table class="data-table">
-                <thead><tr><th>Bill #</th><th>Product</th><th>Product ID</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>Customer</th><th>Date</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Bill #</th><th>Product</th><th>Product-ID</th><th>Qty</th><th>Unit Price</th><th>Total (incl. VAT)</th><th>Customer</th><th>Date</th><th>Actions</th></tr></thead>
                 <tbody>
                 <?php foreach ($filteredSales as $s): ?>
                 <tr>
@@ -537,40 +559,28 @@ if ($view === 'inventory' && $detailProduct) {
         </div>
         <div class="stats">
             <div class="stat-card"><div class="stat-label">Units Sold</div><div class="stat-value"><?php echo $salesUnits; ?></div></div>
-            <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">Rs.<?php echo number_format($salesTotal,2); ?></div></div>
+            <div class="stat-card"><div class="stat-label">Total Revenue (incl. VAT)</div><div class="stat-value">Rs.<?php echo number_format($salesTotal,2); ?></div></div>
             <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value"><?php echo count($filteredSales); ?></div></div>
         </div>
         <?php if (!empty($salesByProduct)): ?>
         <div class="table-wrap">
             <div class="section-head">Sales by Product</div>
-            <table class="data-table">
-                <thead><tr><th>Product</th><th>Product ID</th><th>Units</th><th>Revenue</th></tr></thead>
-                <tbody>
-                <?php foreach ($salesByProduct as $sp): ?>
-                <tr><td><?php echo htmlspecialchars($sp['name']); ?></td><td><?php echo htmlspecialchars($sp['sku']); ?></td><td><?php echo $sp['qty']; ?></td><td>Rs.<?php echo number_format($sp['total'],2); ?></td></tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+            <table class="data-table"><thead><tr><th>Product</th><th>Product-ID</th><th>Units</th><th>Revenue</th></tr></thead>
+            <tbody><?php foreach ($salesByProduct as $sp): ?><tr><td><?php echo htmlspecialchars($sp['name']); ?></td><td><?php echo htmlspecialchars($sp['sku']); ?></td><td><?php echo $sp['qty']; ?></td><td>Rs.<?php echo number_format($sp['total'],2); ?></td></tr><?php endforeach; ?></tbody></table>
         </div>
         <?php endif; ?>
         <?php if (!empty($salesByDay)): ?>
         <div class="table-wrap">
             <div class="section-head">Sales by Day</div>
-            <table class="data-table">
-                <thead><tr><th>Date</th><th>Units</th><th>Revenue</th></tr></thead>
-                <tbody>
-                <?php foreach ($salesByDay as $day => $sd): ?>
-                <tr><td><?php echo htmlspecialchars($day); ?></td><td><?php echo $sd['qty']; ?></td><td>Rs.<?php echo number_format($sd['total'],2); ?></td></tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+            <table class="data-table"><thead><tr><th>Date</th><th>Units</th><th>Revenue</th></tr></thead>
+            <tbody><?php foreach ($salesByDay as $day => $sd): ?><tr><td><?php echo htmlspecialchars($day); ?></td><td><?php echo $sd['qty']; ?></td><td>Rs.<?php echo number_format($sd['total'],2); ?></td></tr><?php endforeach; ?></tbody></table>
         </div>
         <?php endif; ?>
 
         <!-- ═══════ INVENTORY DETAIL ═══════ -->
         <?php elseif ($view==='inventory' && $detailProduct): ?>
         <div class="stats">
-            <div class="stat-card"><div class="stat-label"><?php echo htmlspecialchars($detailProduct['name']); ?></div><div class="stat-value">ID: <?php echo htmlspecialchars($detailProduct['sku']); ?></div></div>
+            <div class="stat-card"><div class="stat-label"><?php echo htmlspecialchars($detailProduct['name']); ?></div><div class="stat-value">Product-ID: <?php echo htmlspecialchars($detailProduct['sku']); ?></div></div>
             <div class="stat-card"><div class="stat-label">Current Stock</div><div class="stat-value <?php echo (int)$detailProduct['quantity']===0?'stock-zero':((int)$detailProduct['quantity']<=LOW_STOCK_THRESHOLD?'stock-low':''); ?>"><?php echo (int)$detailProduct['quantity']; ?></div></div>
             <div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">Rs.<?php echo number_format((float)$detailProduct['price'],2); ?></div></div>
             <div class="stat-card"><div class="stat-label">Category</div><div class="stat-value"><?php echo htmlspecialchars($detailProduct['category']); ?></div></div>
@@ -588,23 +598,77 @@ if ($view === 'inventory' && $detailProduct) {
         </div>
         <?php if (!empty($detailProduct['description'])): ?><div class="form-card"><p><?php echo htmlspecialchars($detailProduct['description']); ?></p></div><?php endif; ?>
         <?php if (!empty($partMovements)): ?>
-        <div class="table-wrap">
-            <div class="section-head">Stock Movements</div>
+        <div class="table-wrap"><div class="section-head">Stock Movements</div>
             <table class="data-table"><thead><tr><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th><th>Date</th></tr></thead>
-            <tbody><?php foreach ($partMovements as $m): ?>
-                <tr><td><span class="badge type-<?php echo htmlspecialchars($m['type']); ?>"><?php echo htmlspecialchars($m['type']); ?></span></td><td><?php echo (int)$m['amount']; ?></td><td><?php echo (int)$m['balance_after']; ?></td><td><?php echo htmlspecialchars($m['note']??''); ?></td><td><?php echo htmlspecialchars($m['created_at']); ?></td></tr>
-            <?php endforeach; ?></tbody></table>
+            <tbody><?php foreach ($partMovements as $m): ?><tr><td><span class="badge type-<?php echo htmlspecialchars($m['type']); ?>"><?php echo htmlspecialchars($m['type']); ?></span></td><td><?php echo (int)$m['amount']; ?></td><td><?php echo (int)$m['balance_after']; ?></td><td><?php echo htmlspecialchars($m['note']??''); ?></td><td><?php echo htmlspecialchars($m['created_at']); ?></td></tr><?php endforeach; ?></tbody></table>
         </div>
         <?php endif; ?>
         <?php if (!empty($partSales)): ?>
-        <div class="table-wrap">
-            <div class="section-head">Sales History</div>
-            <table class="data-table"><thead><tr><th>Bill #</th><th>Qty</th><th>Total</th><th>Customer</th><th>Date</th></tr></thead>
-            <tbody><?php foreach ($partSales as $ps): ?>
-                <tr><td><code><?php echo htmlspecialchars($ps['bill_no']); ?></code></td><td><?php echo (int)$ps['quantity']; ?></td><td>Rs.<?php echo number_format((float)$ps['total'],2); ?></td><td><?php echo htmlspecialchars($ps['customer_name']); ?></td><td><?php echo htmlspecialchars($ps['sale_date']); ?></td></tr>
-            <?php endforeach; ?></tbody></table>
+        <div class="table-wrap"><div class="section-head">Sales History</div>
+            <table class="data-table"><thead><tr><th>Bill #</th><th>Qty</th><th>Total (incl. VAT)</th><th>Customer</th><th>Date</th></tr></thead>
+            <tbody><?php foreach ($partSales as $ps): ?><tr><td><code><?php echo htmlspecialchars($ps['bill_no']); ?></code></td><td><?php echo (int)$ps['quantity']; ?></td><td>Rs.<?php echo number_format((float)$ps['total'],2); ?></td><td><?php echo htmlspecialchars($ps['customer_name']); ?></td><td><?php echo htmlspecialchars($ps['sale_date']); ?></td></tr><?php endforeach; ?></tbody></table>
         </div>
         <?php endif; ?>
+
+        <!-- ═══════ BILL ═══════ -->
+<?php elseif ($view==='bill' && $billSale):
+    if(isset($billSale['_subtotal'])){
+        $bSub=(float)$billSale['_subtotal'];
+        $bTax=(float)$billSale['_tax'];
+        $bTotal=(float)$billSale['_total'];
+    } else {
+        $bTotal=(float)$billSale['total'];
+        $bSub=round($bTotal/1.13,2);
+        $bTax=round($bTotal-$bSub,2);
+    }
+?>
+<div class="bill-print">
+    <h1>Nirman</h1>
+    <div class="bill-title">Bill</div>
+    <div class="bill-company-info">
+        Phone: +977 9705217752 &nbsp;|&nbsp; Email: sales@nirmanirm.com
+    </div>
+    <hr class="bill-divider">
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem;">
+        <div>
+            <div style="font-weight:700;font-size:1.1rem;"><?php echo htmlspecialchars($billSale['customer_name']); ?></div>
+            <?php if(!empty($billSale['customer_phone'])): ?>
+            <div style="color:#64748b;"><?php echo htmlspecialchars($billSale['customer_phone']); ?></div>
+            <?php endif; ?>
+        </div>
+        <div style="text-align:right;font-size:.9rem;">
+            <div><strong>Bill No:</strong> <?php echo htmlspecialchars($billSale['bill_no']); ?></div>
+            <div><strong>Date:</strong> <?php echo htmlspecialchars($billSale['sale_date']); ?></div>
+        </div>
+    </div>
+    <table>
+        <thead><tr><th>DESCRIPTION</th><th style="text-align:center;">QTY</th><th style="text-align:right;">RATE</th><th style="text-align:right;">AMOUNT</th></tr></thead>
+        <tbody>
+        <tr>
+            <td><?php echo htmlspecialchars($billSale['product_name']); ?></td>
+            <td style="text-align:center;"><?php echo (int)$billSale['quantity']; ?></td>
+            <td style="text-align:right;">Rs.<?php echo number_format((float)$billSale['unit_price'],2); ?></td>
+            <td style="text-align:right;">Rs.<?php echo number_format($bSub,2); ?></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="bill-totals">
+        <table>
+            <tr><td>SUBTOTAL</td><td>Rs.<?php echo number_format($bSub,2); ?></td></tr>
+            <tr><td>TAX RATE (13%)</td><td></td></tr>
+            <tr><td>SALES TAX</td><td>Rs.<?php echo number_format($bTax,2); ?></td></tr>
+            <tr class="grand-total"><td>TOTAL</td><td>Rs.<?php echo number_format($bTotal,2); ?></td></tr>
+        </table>
+    </div>
+    <hr class="bill-divider">
+    <div class="bill-footer">THANK YOU FOR YOUR BUSINESS!</div>
+    <div class="form-actions no-print" style="margin-top:1rem">
+        <a href="dashboard.php?download=pdf&sale_id=<?php echo (int)$billSale['id']; ?>" class="btn btn-primary">Download PDF</a>
+        <button onclick="window.print()" class="btn btn-secondary">Print</button>
+        <a href="dashboard.php?view=sales" class="btn btn-ghost">View All Sales</a>
+        <a href="dashboard.php?view=list" class="btn btn-ghost">Back to Products</a>
+    </div>
+</div>
 
         <!-- ═══════ NOTIFICATIONS ═══════ -->
         <?php elseif ($view==='notifications'): ?>
@@ -620,16 +684,16 @@ if ($view === 'inventory' && $detailProduct) {
                 <thead><tr><th>Type</th><th>Title</th><th>Message</th><th>Product</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
                 <tbody>
                 <?php foreach ($sortedNotifications as $n): ?>
-                <tr>
-                    <td><span class="badge type-<?php echo htmlspecialchars($n['type']); ?>"><?php echo htmlspecialchars($n['type']); ?></span></td>
-                    <td><?php echo htmlspecialchars($n['title']); ?></td>
-                    <td><?php echo htmlspecialchars($n['message']); ?></td>
-                    <td><?php if (!empty($n['product_id'])): ?><a href="dashboard.php?view=inventory&id=<?php echo (int)$n['product_id']; ?>">#<?php echo (int)$n['product_id']; ?></a><?php else: ?>—<?php endif; ?></td>
-                    <td><?php echo (int)$n['is_read']===0?'🔴 Unread':'✅ Read'; ?></td>
-                    <td><?php echo htmlspecialchars($n['created_at']); ?></td>
-                    <td>
-                        <?php if ((int)$n['is_read']===0): ?><form method="POST" class="inline-form"><input type="hidden" name="action" value="mark_read"><input type="hidden" name="id" value="<?php echo (int)$n['id']; ?>"><button type="submit" class="btn btn-sm btn-secondary">Read</button></form><?php endif; ?>
-                        <form method="POST" class="inline-form"><input type="hidden" name="action" value="delete_notification"><input type="hidden" name="id" value="<?php echo (int)$n['id']; ?>"><button type="submit" class="btn btn-sm btn-danger">×</button></form>
+                <tr style="<?php echo (int)$n['is_read']===0?'font-weight:600;':''; ?>">
+                    <td><span class="badge type-<?php echo htmlspecialchars($n['type']??'info'); ?>"><?php echo htmlspecialchars($n['type']??'info'); ?></span></td>
+                    <td><?php echo htmlspecialchars($n['title']??''); ?></td>
+                    <td><?php echo htmlspecialchars($n['message']??''); ?></td>
+                    <td><?php echo !empty($n['product_id'])?'<a href="dashboard.php?view=inventory&id='.(int)$n['product_id'].'">View</a>':'—'; ?></td>
+                    <td><?php echo (int)$n['is_read']===0?'<span style="color:#f59e0b">Unread</span>':'Read'; ?></td>
+                    <td><?php echo htmlspecialchars($n['created_at']??''); ?></td>
+                    <td class="row-actions">
+                        <?php if((int)$n['is_read']===0): ?><form method="POST" class="inline-form"><input type="hidden" name="action" value="mark_read"><input type="hidden" name="id" value="<?php echo (int)$n['id']; ?>"><button type="submit" class="btn btn-sm btn-secondary">Read</button></form><?php endif; ?>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete?');"><input type="hidden" name="action" value="delete_notification"><input type="hidden" name="id" value="<?php echo (int)$n['id']; ?>"><button type="submit" class="btn btn-sm btn-danger">Delete</button></form>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -637,30 +701,6 @@ if ($view === 'inventory' && $detailProduct) {
             </table>
             <?php endif; ?>
         </div>
-
-        <!-- ═══════ BILL ═══════ -->
-        <?php elseif ($view==='bill' && $billSale): ?>
-        <div class="form-card">
-            <h2>Invoice: <?php echo htmlspecialchars($billSale['bill_no']); ?></h2>
-            <div class="bill-meta">
-                <div><strong>Customer:</strong> <?php echo htmlspecialchars($billSale['customer_name']); ?></div>
-                <?php if (!empty($billSale['customer_phone'])): ?><div><strong>Phone:</strong> <?php echo htmlspecialchars($billSale['customer_phone']); ?></div><?php endif; ?>
-                <div><strong>Date:</strong> <?php echo htmlspecialchars($billSale['sale_date']); ?></div>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>Product</th><th>Product ID</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
-                <tbody>
-                <tr><td><?php echo htmlspecialchars($billSale['product_name']); ?></td><td><?php echo htmlspecialchars($billSale['sku']); ?></td><td><?php echo (int)$billSale['quantity']; ?></td><td>Rs.<?php echo number_format((float)$billSale['unit_price'],2); ?></td><td>Rs.<?php echo number_format((float)$billSale['total'],2); ?></td></tr>
-                </tbody>
-                <tfoot><tr><td colspan="4" style="text-align:right"><strong>Grand Total</strong></td><td><strong>Rs.<?php echo number_format((float)$billSale['total'],2); ?></strong></td></tr></tfoot>
-            </table>
-            <?php if (!empty($billSale['note'])): ?><p><strong>Note:</strong> <?php echo htmlspecialchars($billSale['note']); ?></p><?php endif; ?>
-            <div class="form-actions">
-                <a href="dashboard.php?download=pdf&sale_id=<?php echo (int)$billSale['id']; ?>" class="btn btn-primary">Download PDF</a>
-                <a href="dashboard.php?view=sales" class="btn btn-ghost">Back to Sales</a>
-            </div>
-        </div>
-
         <?php endif; ?>
     </main>
 </div>

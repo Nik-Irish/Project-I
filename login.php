@@ -1,209 +1,178 @@
 <?php
-// Initialize message variables
-$errorMessage = "";
-$successMessage = "";
+session_start();
 
-// Determine current mode: 'login', 'register', or 'forgot'
-$allowedModes = ['login', 'register', 'forgot'];
-$mode = (isset($_GET['action']) && in_array($_GET['action'], $allowedModes, true))
-    ? $_GET['action']
-    : 'login';
+ $errorMessage = ''; $successMessage = '';
+ $dbHost='localhost'; $dbPort=3306; $dbUser='root'; $dbPass=''; $dbName='ims';
 
-// Check if a form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+ $allowedModes = ['login','register','forgot'];
+ $mode = (isset($_GET['action']) && in_array($_GET['action'],$allowedModes,true)) ? $_GET['action'] : 'login';
 
+try {
+    $pdo = new PDO("mysql:host=$dbHost;port=$dbPort;charset=utf8mb4",$dbUser,$dbPass,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+    $pdo->exec("USE `$dbName`");
+} catch(PDOException $e) {
+    die('<div style="text-align:center;padding:3rem;color:#fca5a5;font-family:sans-serif;background:#0f172a"><h2>Database Error</h2><p>'.htmlspecialchars($e->getMessage()).'</p><p>Run <a href="install.php" style="color:#38bdf8">install.php</a> first.</p></div>');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // ── REGISTER ──
     if ($mode === 'register') {
-        // --- REGISTER / CREATE ACCOUNT VALIDATION ---
-        $username = trim($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $confirmPassword = $_POST['confirm_password'] ?? '';
+        $username = trim($_POST['username']??'');
+        $password = $_POST['password']??'';
+        $confirm  = $_POST['confirm_password']??'';
+        $role     = 'staff'; // ← ALWAYS staff, never admin
 
-        // 1. Check for empty fields
-        if (empty($username) || empty($password) || empty($confirmPassword)) {
-            $errorMessage = "All registration fields are required.";
-        }
-        // 2. Validate Username structure (Alphanumeric only, 3-15 chars)
-        elseif (!preg_match('/^[a-zA-Z0-9]{3,15}$/', $username)) {
-            $errorMessage = "Username must be 3-15 characters long and contain only letters and numbers.";
-        }
-        // 3. Strict Password Complexity Check
-        // Requires: >=8 chars, 1 Uppercase, 1 Lowercase, 1 Number, 1 Special Char
-        elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
-            $errorMessage = "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&).";
-        }
-        // 4. Check if passwords match
-        elseif ($password !== $confirmPassword) {
-            $errorMessage = "Passwords do not match. Please try again.";
-        } else {
-            // Success placeholder (In a real app, you would insert this into a database here)
-            $successMessage = "Account created successfully! You can now log in.";
-            $mode = 'login'; // Switch back to login view on success
-        }
-
-    } elseif ($mode === 'forgot') {
-        // --- FORGOT PASSWORD VALIDATION ---
-        $username = trim($_POST['username'] ?? '');
-        $newPassword = $_POST['new_password'] ?? '';
-        $confirmPassword = $_POST['confirm_password'] ?? '';
-
-        // 1. Check for empty fields
-        if (empty($username) || empty($newPassword) || empty($confirmPassword)) {
-            $errorMessage = "All fields are required to reset your password.";
-        }
-        // 2. Validate Username structure
-        elseif (!preg_match('/^[a-zA-Z0-9]{3,15}$/', $username)) {
-            $errorMessage = "Username must be 3-15 characters long and contain only letters and numbers.";
-        }
-        // 3. Same password complexity rules as registration
-        elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $newPassword)) {
-            $errorMessage = "New password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&).";
-        }
-        // 4. Check if passwords match
-        elseif ($newPassword !== $confirmPassword) {
-            $errorMessage = "Passwords do not match. Please try again.";
-        } else {
-            // Dummy check for presentation (in a real app: look up user, update password hash)
-            if ($username === "admin") {
-                $successMessage = "Password reset successfully! You can now log in with your new password.";
-                $mode = 'login';
-            } else {
-                // For demo: accept any valid username format as "found"
-                // Real apps should not reveal whether a username exists
-                $successMessage = "If an account exists for that username, the password has been reset. You can now log in.";
+        if (empty($username)||empty($password)||empty($confirm)) { $errorMessage = 'All fields required.'; }
+        elseif (!preg_match('/^[a-zA-Z0-9]{3,15}$/',$username)) { $errorMessage = 'Username: 3-15 chars, letters & numbers.'; }
+        elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',$password)) { $errorMessage = 'Password: 8+ chars, uppercase, lowercase, number, special char.'; }
+        elseif ($password !== $confirm) { $errorMessage = 'Passwords do not match.'; }
+        else {
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username=?'); $stmt->execute([$username]);
+            if ($stmt->fetchColumn()>0) { $errorMessage = 'Username already exists.'; }
+            else {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $pdo->prepare('INSERT INTO users (username,password_hash,role) VALUES (?,?,?)')->execute([$username,$hash,$role]);
+                $successMessage = 'Staff account created! You can now log in.';
                 $mode = 'login';
             }
         }
+    }
 
-    } else {
-        // --- LOGIN VALIDATION LOGIC ---
-        $username = trim($_POST['username'] ?? '');
-        $password = trim($_POST['password'] ?? '');
+    // ── FORGOT PASSWORD ──
+    elseif ($mode === 'forgot') {
+        $username = trim($_POST['username']??'');
+        $newPass  = $_POST['new_password']??'';
+        $confirm  = $_POST['confirm_password']??'';
 
-        if (empty($username) || empty($password)) {
-            $errorMessage = "Both fields are required.";
-        } else {
-            // Dummy check for presentation
-            if ($username === "admin" && $password === "Password123!") {
-                header("Location: dashboard.php");
+        if (empty($username)||empty($newPass)||empty($confirm)) { $errorMessage = 'All fields required.'; }
+        elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',$newPass)) { $errorMessage = 'Password: 8+ chars, uppercase, lowercase, number, special char.'; }
+        elseif ($newPass !== $confirm) { $errorMessage = 'Passwords do not match.'; }
+        else {
+            $stmt = $pdo->prepare('SELECT id FROM users WHERE username=?'); $stmt->execute([$username]);
+            if ($stmt->fetch()) {
+                $hash = password_hash($newPass, PASSWORD_DEFAULT);
+                $pdo->prepare('UPDATE users SET password_hash=? WHERE username=?')->execute([$hash,$username]);
+                $successMessage = 'Password reset! Log in now.';
+                $mode = 'login';
+            } else { $errorMessage = 'Username not found.'; }
+        }
+    }
+
+    // ── LOGIN ──
+    else {
+        $username = trim($_POST['username']??'');
+        $password = $_POST['password']??'';
+
+        if (empty($username)||empty($password)) { $errorMessage = 'Both fields required.'; }
+        else {
+            $stmt = $pdo->prepare('SELECT * FROM users WHERE username=?'); $stmt->execute([$username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user && password_verify($password, $user['password_hash'])) {
+                $_SESSION['user_id']  = (int)$user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role']     = $user['role'];
+                if ($user['role'] === 'admin') { header('Location: dashboard.php'); }
+                else { header('Location: staff_dashboard.php'); }
                 exit;
-            } else {
-                $errorMessage = "Invalid username or password.";
-            }
+            } else { $errorMessage = 'Invalid username or password.'; }
         }
     }
 }
 
-// Page titles per mode
-$pageTitles = [
-    'login'    => 'Login',
-    'register' => 'Create Account',
-    'forgot'   => 'Forgot Password',
-];
-$pageTitle = $pageTitles[$mode] ?? 'Login';
+ $pageTitles = ['login'=>'Login','register'=>'Create Account','forgot'=>'Reset Password'];
+ $pageTitle = $pageTitles[$mode] ?? 'Login';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($pageTitle); ?></title>
-    <link rel="stylesheet" href="login-style.css">
+    <title><?php echo htmlspecialchars($pageTitle); ?> | IMS Nepal</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:"Segoe UI",system-ui,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:1rem}
+        .lc{max-width:440px;width:100%;background:rgba(30,41,59,.95);border:1px solid rgba(148,163,184,.15);border-radius:16px;padding:2rem 2.25rem;box-shadow:0 20px 40px -12px rgba(0,0,0,.4)}
+        .lc h2{font-size:1.5rem;color:#f8fafc;margin-bottom:.25rem}
+        .sub{color:#94a3b8;font-size:.85rem;margin-bottom:1.5rem}
+        .roles{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
+        .rc{background:rgba(15,23,42,.6);border-radius:10px;padding:.85rem;text-align:center}
+        .msg{padding:.65rem .85rem;border-radius:8px;font-size:.85rem;margin-bottom:1rem}
+        .me{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5}
+        .ms{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#86efac}
+        .fg{margin-bottom:.9rem}
+        .fg label{display:block;font-size:.8rem;font-weight:500;color:#cbd5e1;margin-bottom:.3rem}
+        .req{color:#f87171}
+        .fg input{width:100%;padding:.55rem .75rem;font-size:.9rem;color:#f1f5f9;background:#0f172a;border:1px solid #334155;border-radius:8px;outline:none;font-family:inherit}
+        .fg input:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.2)}
+        .ph{display:block;font-size:.7rem;color:#64748b;margin-top:.25rem}
+        .fa{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:1.25rem}
+        .bs{padding:.6rem 1.25rem;font-size:.9rem;font-weight:600;color:#0f172a;background:linear-gradient(135deg,#38bdf8,#0ea5e9);border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:box-shadow .15s}
+        .bs:hover{box-shadow:0 6px 16px rgba(14,165,233,.35)}
+        .sl,.fl{color:#38bdf8;font-size:.8rem;text-decoration:none}
+        .sl:hover,.fl:hover{text-decoration:underline}
+        .fr{margin-top:.75rem;text-align:center}
+        .div{height:1px;background:rgba(148,163,184,.12);margin:1rem 0}
+        .staff-tag{display:inline-block;font-size:.7rem;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#fbbf24;padding:.2rem .5rem;border-radius:4px;margin-top:.3rem}
+    </style>
 </head>
-
 <body>
+<div class="lc">
+    <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
+    <p class="sub">
+        <?php if($mode==='register'): ?>Create a staff account<?php elseif($mode==='forgot'): ?>Reset your password<?php else: ?>Welcome to IMS Nepal<?php endif; ?>
+    </p>
 
-    <div class="login-container">
-
-        <!-- Screen header based on mode -->
-        <?php if ($mode === 'register'): ?>
-            <h2>Create Account</h2>
-            <p class="subtitle">Sign up to get started</p>
-        <?php elseif ($mode === 'forgot'): ?>
-            <h2>Forgot Password</h2>
-            <p class="subtitle">Enter your username and choose a new password</p>
-        <?php else: ?>
-            <h2>Login</h2>
-            <p class="subtitle">Welcome back! Please sign in</p>
-        <?php endif; ?>
-
-        <!-- Status & Validation Feedback Messages -->
-        <?php if (!empty($errorMessage)): ?>
-            <div class="message error-message"><?php echo htmlspecialchars($errorMessage); ?></div>
-        <?php endif; ?>
-
-        <?php if (!empty($successMessage)): ?>
-            <div class="message success-message"><?php echo htmlspecialchars($successMessage); ?></div>
-        <?php endif; ?>
-
-        <!-- Form Element -->
-        <form action="login.php?action=<?php echo htmlspecialchars($mode); ?>" method="POST" autocomplete="off">
-
-            <!-- Username (all modes) -->
-            <div class="form-group">
-                <label for="username">Username <span class="required">*</span></label>
-                <input type="text" id="username" name="username" placeholder="Your username"
-                    value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
-                    required>
-            </div>
-
-            <?php if ($mode === 'forgot'): ?>
-                <!-- Forgot password: new password + confirm -->
-                <div class="form-group">
-                    <label for="new_password">New Password <span class="required">*</span></label>
-                    <input type="password" id="new_password" name="new_password" placeholder="Enter new password" required>
-                    <small class="password-hint">Min. 8 characters with uppercase, lowercase, number, and symbol.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm_password">Confirm New Password <span class="required">*</span></label>
-                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat new password" required>
-                </div>
-
-            <?php else: ?>
-                <!-- Login / Register: password field -->
-                <div class="form-group">
-                    <label for="password">Password <span class="required">*</span></label>
-                    <input type="password" id="password" name="password" placeholder="Your password" required>
-                    <?php if ($mode === 'register'): ?>
-                        <small class="password-hint">Min. 8 characters with uppercase, lowercase, number, and symbol.</small>
-                    <?php endif; ?>
-                </div>
-
-                <?php if ($mode === 'register'): ?>
-                    <div class="form-group">
-                        <label for="confirm_password">Confirm Password <span class="required">*</span></label>
-                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat your password" required>
-                    </div>
-                <?php endif; ?>
-            <?php endif; ?>
-
-            <div class="form-actions">
-                <?php if ($mode === 'register'): ?>
-                    <a href="login.php?action=login" class="switch-link">Back to Login</a>
-                    <button type="submit" class="btn-submit">Create Account</button>
-
-                <?php elseif ($mode === 'forgot'): ?>
-                    <a href="login.php?action=login" class="switch-link">Back to Login</a>
-                    <button type="submit" class="btn-submit">Reset Password</button>
-
-                <?php else: ?>
-                    <a href="login.php?action=register" class="switch-link">Create an account</a>
-                    <button type="submit" class="btn-submit">Log In</button>
-                <?php endif; ?>
-            </div>
-
-            <?php if ($mode === 'login'): ?>
-                <div class="forgot-row">
-                    <a href="login.php?action=forgot" class="forgot-link">Forgot password?</a>
-                </div>
-            <?php endif; ?>
-
-        </form>
-
+    <?php if($mode==='login'): ?>
+    <div class="roles">
+        <div class="rc admin">
+            <div class="rl">Admin</div>
+            
+        </div>
+        <div class="rc staff">
+            <div class="rl">Staff</div>
+           
+        </div>
     </div>
+    <div class="div"></div>
+    <?php endif; ?>
 
-</body>
+    <?php if($errorMessage): ?><div class="msg me"><?php echo htmlspecialchars($errorMessage); ?></div><?php endif; ?>
+    <?php if($successMessage): ?><div class="msg ms"><?php echo htmlspecialchars($successMessage); ?></div><?php endif; ?>
 
-</html>
+    <form action="login.php?action=<?php echo htmlspecialchars($mode); ?>" method="POST" autocomplete="off">
+        <div class="fg">
+            <label>Username <span class="req">*</span></label>
+            <input type="text" name="username" required value="<?php echo htmlspecialchars($_POST['username']??''); ?>">
+        </div>
+
+        <?php if($mode==='forgot'): ?>
+            <div class="fg"><label>New Password <span class="req">*</span></label><input type="password" name="new_password" required><small class="ph">8+ chars, uppercase, lowercase, number, special char.</small></div>
+            <div class="fg"><label>Confirm Password <span class="req">*</span></label><input type="password" name="confirm_password" required></div>
+        <?php elseif($mode==='register'): ?>
+            <div class="fg"><label>Password <span class="req">*</span></label><input type="password" name="password" required><small class="ph">8+ chars, uppercase, lowercase, number, special char.</small></div>
+            <div class="fg"><label>Confirm Password <span class="req">*</span></label><input type="password" name="confirm_password" required></div>
+            <!-- Role is ALWAYS staff — hidden input INSIDE the form -->
+            <input type="hidden" name="role" value="staff">
+            <div style="text-align:center;margin-bottom:.5rem"><span class="staff-tag">👷 Registering as Staff</span></div>
+        <?php else: ?>
+            <div class="fg"><label>Password <span class="req">*</span></label><input type="password" name="password" required></div>
+        <?php endif; ?>
+
+        <div class="fa">
+            <?php if($mode==='register'): ?>
+                <a href="login.php?action=login" class="sl">Back to Login</a>
+                <button type="submit" class="bs">Create Account</button>
+            <?php elseif($mode==='forgot'): ?>
+                <a href="login.php?action=login" class="sl">Back to Login</a>
+                <button type="submit" class="bs">Reset Password</button>
+            <?php else: ?>
+                <a href="login.php?action=register" class="sl">Create account</a>
+                <button type="submit" class="bs">Log In</button>
+            <?php endif; ?>
+        </div>
+
+        <?php if($mode==='login'): ?>
+            <div class="fr"><a href="login.php?action=forgot" class="fl">Forgot password?</a></div>
+        <?php endif; ?>
+    </form>
