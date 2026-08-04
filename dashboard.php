@@ -716,7 +716,7 @@ $bannerNotes = $pdo->query(
 
 // ── Page meta ─────────────────────────────────────────────────────────────────
 $pageTitles = [
-    'list'          => 'Products',
+    'list'          => 'Dashboard',
     'add'           => 'Add Product',
     'edit'          => 'Modify Product',
     'sales'         => 'Sales Report',
@@ -729,7 +729,7 @@ $pageTitles = [
 ];
 
 $pageSub = [
-    'list'          => 'Manage products and stock levels',
+    'list'          => 'Overview of products and stock levels',
     'add'           => 'Add a new product to the catalog',
     'edit'          => 'Update product details',
     'sales'         => 'View all recorded sales',

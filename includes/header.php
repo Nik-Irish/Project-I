@@ -21,12 +21,12 @@ $unreadNotifications = $unreadNotifications ?? 0;
 
     <!-- ═══════ SIDEBAR ═══════ -->
     <aside class="sidebar">
-        <div class="brand">Nirman</div>
+        <a href="dashboard.php?view=list" class="brand brand-link">Nirman</a>
 
         <nav class="nav">
             <a href="dashboard.php?view=list"
                class="nav-link <?php echo $view === 'list'          ? 'active' : ''; ?>">
-                Products
+                Dashboard
             </a>
             <a href="dashboard.php?view=add"
                class="nav-link <?php echo $view === 'add'           ? 'active' : ''; ?>">

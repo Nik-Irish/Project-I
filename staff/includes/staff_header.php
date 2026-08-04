@@ -18,11 +18,11 @@ $view = $view ?? 'list';
 <body>
 <div class="app">
     <aside class="sidebar">
-        <div class="brand">Nirman</div>
+        <a href="staff_dashboard.php?view=list" class="brand brand-link">Nirman</a>
         <nav class="nav">
             <a href="../staff_dashboard.php?view=list"
                class="nav-link <?php echo $view === 'list' ? 'active' : ''; ?>">
-                Products
+                Dashboard
             </a>
             <a href="../staff_dashboard.php?view=sale_add"
                class="nav-link <?php echo $view === 'sale_add' ? 'active' : ''; ?>">

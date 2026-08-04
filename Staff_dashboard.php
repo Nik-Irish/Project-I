@@ -94,16 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sale'
 }
 
 $pageTitles = [
-    'list' => 'Products',
+    'list' => 'Dashboard',
     'sale_add' => 'Record Sale',
     'sales' => 'My Sales',
 ];
 $pageSub = [
-    'list' => 'Browse available items',
+    'list' => 'Overview of available items',
     'sale_add' => 'Record a sale quickly',
     'sales' => 'Your recent sales',
 ];
-$pageTitle = $pageTitles[$view] ?? 'Products';
+$pageTitle = $pageTitles[$view] ?? 'Dashboard';
 
 require_once __DIR__ . '/staff/includes/staff_header.php';
 ?>

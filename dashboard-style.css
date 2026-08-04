@@ -32,6 +32,13 @@ body {
     letter-spacing: .04em;
 }
 
+.brand-link {
+    display: block;
+    text-decoration: none;
+}
+
+.brand-link:hover { color: #38bdf8; }
+
 .nav {
     display: flex;
     flex-direction: column;
