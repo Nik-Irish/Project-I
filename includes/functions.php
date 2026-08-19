@@ -32,6 +32,62 @@ function logMovement(
     )->execute([$pid, $type, $amt, $bal, $note]);
 }
 
+function recordSale(
+    PDO $pdo,
+    array $product,
+    int $quantity,
+    float $unitPrice,
+    string $customerName,
+    string $customerPhone,
+    string $note,
+    string $saleDate,
+    ?int $staffId = null,
+    ?string $staffName = null
+): array {
+    $subtotal = round($unitPrice * $quantity, 2);
+    $tax = round($subtotal * TAX_RATE, 2);
+    $total = round($subtotal + $tax, 2);
+    $oldQuantity = (int)$product['quantity'];
+    $newQuantity = $oldQuantity - $quantity;
+
+    $pdo->prepare('UPDATE products SET quantity=? WHERE id=?')
+        ->execute([$newQuantity, (int)$product['id']]);
+
+    $pdo->prepare(
+        "INSERT INTO sales (bill_no, product_id, product_name, sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_id, staff_name)
+         VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )->execute([
+        (int)$product['id'],
+        $product['name'],
+        $product['sku'],
+        $product['category'] ?? 'General',
+        $quantity,
+        $unitPrice,
+        $total,
+        $customerName,
+        $customerPhone,
+        $note,
+        $saleDate,
+        $staffId,
+        $staffName,
+    ]);
+
+    $saleId = (int)$pdo->lastInsertId();
+    $billNo = makeBillNo($saleId);
+    $pdo->prepare('UPDATE sales SET bill_no=? WHERE id=?')->execute([$billNo, $saleId]);
+
+    logMovement($pdo, (int)$product['id'], 'sale', $quantity, $newQuantity, 'Sale ' . $billNo);
+    checkStockNotification($pdo, array_merge($product, ['quantity' => $newQuantity]), $oldQuantity, $newQuantity);
+
+    return [
+        'id' => $saleId,
+        'bill_no' => $billNo,
+        'subtotal' => $subtotal,
+        'tax' => $tax,
+        'total' => $total,
+    ];
+}
+
 // ── Insert a notification record ──────────────────────────────────────────────
 function addNotification(
     PDO $pdo,

@@ -39,6 +39,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Username</th>
+                    <th>Password</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -53,7 +54,7 @@
                     <!-- ── Inline edit row ── -->
                     <tr class="editing-row">
                         <td><?php echo (int)$st['id']; ?></td>
-                        <td colspan="2">
+                        <td colspan="3">
                             <form method="POST" action="dashboard.php?view=staff"
                                   class="inline-edit-form">
                                 <input type="hidden" name="action" value="staff_update">
@@ -91,8 +92,28 @@
                         <td><?php echo (int)$st['id']; ?></td>
                         <td><?php echo htmlspecialchars($st['username']); ?></td>
                         <td>
-                            <a href="dashboard.php?view=staff&edit=<?php echo (int)$st['id']; ?>"
-                               class="btn btn-sm btn-secondary">Edit</a>
+                            <form method="POST" action="dashboard.php?view=staff"
+                                  class="inline-form staff-password-form">
+                                <input type="hidden" name="action" value="staff_password_update">
+                                <input type="hidden" name="id"
+                                       value="<?php echo (int)$st['id']; ?>">
+                                <div class="pw-input-wrap staff-password-wrap">
+                                    <input type="password"
+                                           name="password"
+                                           id="staff-password-<?php echo (int)$st['id']; ?>"
+                                           class="staff-password-input"
+                                           placeholder="New password"
+                                           aria-label="New password for <?php echo htmlspecialchars($st['username']); ?>"
+                                           required>
+                                    <button type="button" class="pw-toggle"
+                                            data-target="staff-password-<?php echo (int)$st['id']; ?>">
+                                        Show
+                                    </button>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-primary">Set</button>
+                            </form>
+                        </td>
+                        <td>
                             <form method="POST" class="inline-form"
                                   style="margin-left:.4rem;"
                                   onsubmit="return confirm('Delete this staff user?');">
@@ -174,6 +195,15 @@
     .edit-username { width: 140px; }
     .edit-pw-wrap  { width: 240px; }
     .edit-pw-wrap input { width: 100%; }
+    .staff-password-form { display: flex; align-items: center; gap: .4rem; }
+    .staff-password-wrap { width: 190px; }
+    .staff-password-input { width: 100%; padding: .4rem .6rem; font-size: .82rem; color: #f1f5f9; background: #0f172a; border: 1px solid #334155; border-radius: 6px; outline: none; font-family: inherit; }
+    .staff-password-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, .2); }
+    .staff-password-input::placeholder { color: #64748b; }
+    @media (max-width: 760px) {
+        .staff-password-form { align-items: stretch; flex-direction: column; }
+        .staff-password-wrap { width: 100%; }
+    }
 </style>
 
 <!-- ═══════ Password toggle script ═══════ -->

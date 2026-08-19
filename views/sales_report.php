@@ -62,8 +62,9 @@
                     <th>Unit Price</th>
                     <th>Total (incl. VAT)</th>
                     <th>Customer</th>
+                    <th>Recorded By</th>
                     <th>Date</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -76,18 +77,11 @@
                     <td>Rs.<?php echo number_format((float)$s['unit_price'], 2); ?></td>
                     <td>Rs.<?php echo number_format((float)$s['total'],      2); ?></td>
                     <td><?php echo htmlspecialchars($s['customer_name']); ?></td>
+                    <td><?php echo htmlspecialchars($s['staff_name'] ?? 'Admin'); ?></td>
                     <td><?php echo htmlspecialchars($s['sale_date']); ?></td>
-                    <td class="row-actions">
-                        <a href="dashboard.php?view=bill&id=<?php echo (int)$s['id']; ?>"
-                           class="btn btn-sm btn-info">Bill</a>
+                    <td>
                         <a href="dashboard.php?download=pdf&sale_id=<?php echo (int)$s['id']; ?>"
-                           class="btn btn-sm btn-secondary">PDF</a>
-                        <form method="POST" class="inline-form"
-                              onsubmit="return confirm('Delete this sale and restore stock?');">
-                            <input type="hidden" name="action" value="delete_sale">
-                            <input type="hidden" name="id"     value="<?php echo (int)$s['id']; ?>">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
+                           class="btn btn-sm btn-secondary">Download</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

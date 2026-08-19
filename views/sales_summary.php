@@ -4,6 +4,7 @@
  *
  * Requires: $filteredSales, $salesUnits, $salesTotal,
  *           $salesByProduct, $salesByDay,
+ *           $salesByRecorderProduct,
  *           $products, $categories,
  *           $reportFrom, $reportTo, $reportProductId, $reportCategory
  */
@@ -81,6 +82,37 @@
                     <td><?php echo $sp['qty']; ?></td>
                     <td>Rs.<?php echo number_format($sp['total'], 2); ?></td>
                 </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>
+
+<!-- By staff/admin and product -->
+<?php if (!empty($salesByRecorderProduct)): ?>
+    <div class="table-wrap">
+        <div class="section-head">Sales by Staff/Admin and Product</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Recorded By</th>
+                    <th>Product</th>
+                    <th>Product-ID</th>
+                    <th>Units Sold</th>
+                    <th>Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($salesByRecorderProduct as $recorder => $recorderSales): ?>
+                <?php foreach ($recorderSales as $recorderSale): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($recorder); ?></td>
+                        <td><?php echo htmlspecialchars($recorderSale['name']); ?></td>
+                        <td><?php echo htmlspecialchars($recorderSale['sku']); ?></td>
+                        <td><?php echo $recorderSale['qty']; ?></td>
+                        <td>Rs.<?php echo number_format($recorderSale['total'], 2); ?></td>
+                    </tr>
+                <?php endforeach; ?>
             <?php endforeach; ?>
             </tbody>
         </table>

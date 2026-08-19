@@ -7,7 +7,7 @@
 <div class="toolbar">
     <div class="toolbar-left"><strong>Products</strong></div>
     <div class="toolbar-right">
-        <a href="staff_dashboard.php?view=sale_add" class="btn btn-primary">Record Sale</a>
+        <a href="Staff_dashboard.php?view=sale_add" class="btn btn-primary">Record Sale</a>
     </div>
 </div>
 

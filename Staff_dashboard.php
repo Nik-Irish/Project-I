@@ -46,47 +46,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sale'
     } elseif ((int)$qty > (int)$product['quantity']) {
         $errorMessage = 'Not enough stock available.';
         $view = 'sale_add';
-    } elseif ($up === '' || !is_numeric($up) || (float)$up < 0) {
-        $errorMessage = 'Enter a valid unit price.';
-        $view = 'sale_add';
     } else {
         $quantity = (int)$qty;
-        $unitPrice = round((float)$up, 2);
-        $subtotal = round($unitPrice * $quantity, 2);
-        $tax = round($subtotal * TAX_RATE, 2);
-        $total = round($subtotal + $tax, 2);
-        $newQty = (int)$product['quantity'] - $quantity;
-
-        $pdo->prepare('UPDATE products SET quantity = ? WHERE id = ?')
-            ->execute([$newQty, $pid]);
-
-        $next = $pdo->query("SHOW TABLE STATUS LIKE 'sales'")->fetch(PDO::FETCH_ASSOC);
-        $billNo = makeBillNo((int)$next['Auto_increment']);
-
-        $insert = $pdo->prepare(
-            'INSERT INTO sales (bill_no, product_id, product_name, sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_id, staff_name)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-
-        $insert->execute([
-            $billNo,
-            $pid,
-            $product['name'],
-            $product['sku'],
-            $product['category'] ?? 'General',
+        $unitPrice = round((float)$product['price'], 2);
+        $sale = recordSale(
+            $pdo,
+            $product,
             $quantity,
             $unitPrice,
-            $total,
             $customerName,
             $customerPhone,
             $note,
             $saleDate,
-            $_SESSION['user_id'],
-            $_SESSION['username'],
-        ]);
+            (int)$_SESSION['user_id'],
+            $_SESSION['username']
+        );
 
-        logMovement($pdo, $pid, 'sale', $quantity, $newQty, 'Sale ' . $billNo);
-        $successMessage = 'Sale recorded: ' . $billNo;
+        $successMessage = 'Sale recorded: ' . $sale['bill_no'];
         $view = 'sales';
         $salesStmt->execute([$_SESSION['user_id']]);
         $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -103,6 +79,7 @@ $pageSub = [
     'sale_add' => 'Record a sale quickly',
     'sales' => 'Your recent sales',
 ];
+$dashboardScript = 'Staff_dashboard.php';
 $pageTitle = $pageTitles[$view] ?? 'Dashboard';
 
 require_once __DIR__ . '/staff/includes/staff_header.php';
@@ -119,7 +96,7 @@ require_once __DIR__ . '/staff/includes/staff_header.php';
 <?php
 $viewMap = [
     'list' => 'staff/views/staff_products.php',
-    'sale_add' => 'staff/views/staff_record_sale.php',
+    'sale_add' => 'views/record_sale.php',
     'sales' => 'staff/views/staff_sales.php',
 ];
 if (isset($viewMap[$view])) {

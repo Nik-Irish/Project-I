@@ -4,6 +4,7 @@
  *
  * Requires: $products (array)
  */
+$dashboardScript = $dashboardScript ?? 'dashboard.php';
 ?>
 <div class="form-card">
     <h2>Record Sale</h2>
@@ -15,10 +16,10 @@
     <?php if (empty($products)): ?>
         <div class="empty-state">
             <p>No products in stock. Add a product first.</p>
-            <a href="dashboard.php?view=add" class="btn btn-primary">Add Product</a>
+            <a href="<?php echo htmlspecialchars($dashboardScript); ?>?view=add" class="btn btn-primary">Add Product</a>
         </div>
     <?php else: ?>
-        <form method="POST" action="dashboard.php?view=sale_add">
+        <form method="POST" action="<?php echo htmlspecialchars($dashboardScript); ?>?view=sale_add">
             <input type="hidden" name="action" value="sale">
 
             <div class="form-grid">
@@ -62,11 +63,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Unit Price (Rs.) <span class="req">*</span></label>
+                          <label>Unit Price (Rs.) <span class="req">*</span></label>
                     <input type="number" id="unit_price" name="unit_price"
-                           step="0.01" min="0" required
+                              step="0.01" min="0" required readonly
                            value="<?php echo htmlspecialchars($_POST['unit_price'] ?? ''); ?>"
-                           placeholder="Auto-filled on product select">
+                              placeholder="Fixed product price">
                 </div>
 
                 <div class="form-group">
@@ -98,7 +99,7 @@
             </div>
 
             <div class="form-actions">
-                <a href="dashboard.php?view=sales" class="btn btn-ghost">Cancel</a>
+                <a href="<?php echo htmlspecialchars($dashboardScript); ?>?view=sales" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">Record Sale</button>
             </div>
         </form>
