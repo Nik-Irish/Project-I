@@ -151,14 +151,14 @@
         transform: translateY(-50%);
         background: transparent;
         border: none;
-        color: #38bdf8;
+        color: #3F72AF;
         font-size: .78rem;
         font-weight: 600;
         cursor: pointer;
         padding: .25rem .5rem;
         font-family: inherit;
     }
-    .pw-toggle:hover { color: #7dd3fc; }
+    .pw-toggle:hover { color: #F9F7F7; }
 
     /* Add Staff button full-width */
     .btn-block {
@@ -170,7 +170,7 @@
 
     /* Inline edit row */
     .editing-row td {
-        background: rgba(56, 189, 248, .05);
+        background: rgba(63, 114, 175, .15);
     }
     .inline-edit-form {
         display: flex;
@@ -181,25 +181,25 @@
     .edit-input {
         padding: .4rem .6rem;
         font-size: .85rem;
-        color: #f1f5f9;
-        background: #0f172a;
-        border: 1px solid #334155;
+        color: #F9F7F7;
+        background: #0d263f;
+        border: 1px solid rgba(219, 226, 239, .3);
         border-radius: 6px;
         outline: none;
         font-family: inherit;
     }
     .edit-input:focus {
-        border-color: #38bdf8;
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, .2);
+        border-color: #3F72AF;
+        box-shadow: 0 0 0 3px rgba(63, 114, 175, .3);
     }
     .edit-username { width: 140px; }
     .edit-pw-wrap  { width: 240px; }
     .edit-pw-wrap input { width: 100%; }
     .staff-password-form { display: flex; align-items: center; gap: .4rem; }
     .staff-password-wrap { width: 190px; }
-    .staff-password-input { width: 100%; padding: .4rem .6rem; font-size: .82rem; color: #f1f5f9; background: #0f172a; border: 1px solid #334155; border-radius: 6px; outline: none; font-family: inherit; }
-    .staff-password-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, .2); }
-    .staff-password-input::placeholder { color: #64748b; }
+    .staff-password-input { width: 100%; padding: .4rem .6rem; font-size: .82rem; color: #F9F7F7; background: #0d263f; border: 1px solid rgba(219, 226, 239, .3); border-radius: 6px; outline: none; font-family: inherit; }
+    .staff-password-input:focus { border-color: #3F72AF; box-shadow: 0 0 0 3px rgba(63, 114, 175, .3); }
+    .staff-password-input::placeholder { color: #DBE2EF; }
     @media (max-width: 760px) {
         .staff-password-form { align-items: stretch; flex-direction: column; }
         .staff-password-wrap { width: 100%; }

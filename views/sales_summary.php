@@ -8,18 +8,24 @@
  *           $products, $categories,
  *           $reportFrom, $reportTo, $reportProductId, $reportCategory
  */
+$filteredSales = $filteredSales ?? [];
+$salesUnits = $salesUnits ?? 0;
+$salesTotal = $salesTotal ?? 0;
+$salesByProduct = $salesByProduct ?? [];
+$salesByDay = $salesByDay ?? [];
+$salesByRecorderProduct = $salesByRecorderProduct ?? [];
+$products = $products ?? [];
+$categories = $categories ?? [];
+$reportFrom = $reportFrom ?? '';
+$reportTo = $reportTo ?? '';
+$reportProductId = $reportProductId ?? 0;
+$reportCategory = $reportCategory ?? '';
 ?>
 
 <!-- Filter toolbar -->
 <div class="toolbar">
     <form class="search-form" method="GET" action="dashboard.php">
         <input type="hidden" name="view" value="report">
-
-        <input type="date" name="from"
-               value="<?php echo htmlspecialchars($reportFrom); ?>">
-
-        <input type="date" name="to"
-               value="<?php echo htmlspecialchars($reportTo); ?>">
 
         <select name="product_id">
             <option value="">All products</option>

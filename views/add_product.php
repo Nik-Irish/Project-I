@@ -3,7 +3,6 @@
  * views/add_product.php — Add a new product
  */
 ?>
-<a href="dashboard.php"></a> 
 <div class="form-card">
     <h2>New Product</h2>
     <p class="form-hint">Fill in the details below to add a product to inventory.</p>

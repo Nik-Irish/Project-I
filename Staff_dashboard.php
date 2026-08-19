@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sale'
     $customerName = trim($_POST['customer_name'] ?? 'Walk-in Customer');
     $customerPhone = trim($_POST['customer_phone'] ?? '');
     $note = trim($_POST['note'] ?? '');
-    $saleDate = trim($_POST['sale_date'] ?? date('Y-m-d'));
+    $saleDate = date('Y-m-d');
 
     $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
     $stmt->execute([$pid]);

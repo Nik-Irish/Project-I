@@ -8,10 +8,6 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
 ?>
 <div class="form-card">
     <h2>Record Sale</h2>
-    <p class="form-hint">
-        Selling reduces stock and generates a bill automatically.
-        13% VAT will be added to the subtotal.
-    </p>
 
     <?php if (empty($products)): ?>
         <div class="empty-state">
@@ -27,15 +23,14 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
                     <label>Customer Name</label>
                     <input type="text" name="customer_name"
                            value="<?php echo htmlspecialchars($_POST['customer_name'] ?? ''); ?>"
-                           placeholder="Walk-in Customer">
+                    >
                 </div>
 
                 <div class="form-group">
                     <label>Customer Phone</label>
                     <input type="text" name="customer_phone"
-                           value="<?php echo htmlspecialchars($_POST['customer_phone'] ?? ''); ?>"
-                           placeholder="Optional">
-                </div>
+                           value="<?php echo htmlspecialchars($_POST['customer_phone'] ?? ''); ?>">
+                </div>      
 
                 <div class="form-group full">
                     <label>Product <span class="req">*</span></label>
@@ -63,26 +58,22 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
                 </div>
 
                 <div class="form-group">
-                          <label>Unit Price (Rs.) <span class="req">*</span></label>
+                    <label>Unit Price (Rs.) <span class="req">*</span></label>
                     <input type="number" id="unit_price" name="unit_price"
-                              step="0.01" min="0" required readonly
-                           value="<?php echo htmlspecialchars($_POST['unit_price'] ?? ''); ?>"
-                              placeholder="Fixed product price">
+                           step="0.01" min="0" required readonly
+                           value="<?php echo htmlspecialchars($_POST['unit_price'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
                     <label>Sale Date</label>
                     <input type="date" name="sale_date"
-                           value="<?php echo htmlspecialchars(
-                               $_POST['sale_date'] ?? date('Y-m-d')
-                           ); ?>">
+                           value="<?php echo date('Y-m-d'); ?>" readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Note</label>
                     <input type="text" name="note"
-                           value="<?php echo htmlspecialchars($_POST['note'] ?? ''); ?>"
-                           placeholder="Optional">
+                           value="<?php echo htmlspecialchars($_POST['note'] ?? ''); ?>" placeholder="Optional">
                 </div>
             </div>
 

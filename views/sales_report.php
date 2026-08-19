@@ -5,18 +5,19 @@
  * Requires: $filteredSales, $products, $categories,
  *           $reportFrom, $reportTo, $reportProductId, $reportCategory
  */
+$reportFrom = $reportFrom ?? '';
+$reportTo = $reportTo ?? '';
+$reportProductId = $reportProductId ?? 0;
+$reportCategory = $reportCategory ?? '';
+$products = $products ?? [];
+$categories = $categories ?? [];
+$filteredSales = $filteredSales ?? [];
 ?>
 
 <!-- Filter toolbar -->
 <div class="toolbar">
     <form class="search-form" method="GET" action="dashboard.php">
         <input type="hidden" name="view" value="sales">
-
-        <input type="date" name="from"
-               value="<?php echo htmlspecialchars($reportFrom); ?>">
-
-        <input type="date" name="to"
-               value="<?php echo htmlspecialchars($reportTo); ?>">
 
         <select name="product_id">
             <option value="">All products</option>

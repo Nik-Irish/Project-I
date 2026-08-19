@@ -13,13 +13,29 @@ $dbUser = 'root';
 $dbPass = '';
 $dbName = 'ims';
 
-$allowedModes = ['login', 'register', 'forgot'];
+$allowedModes = [
+    'login',
+    'register',
+    'forgot'
+];
 
-$mode = in_array($_GET['action'] ?? '', $allowedModes, true)
+$mode = in_array(
+    $_GET['action'] ?? '',
+    $allowedModes,
+    true
+)
     ? $_GET['action']
     : 'login';
 
-$passwordRules = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/';
+
+/*
+|--------------------------------------------------------------------------
+| PASSWORD RULES
+|--------------------------------------------------------------------------
+*/
+
+$passwordRules =
+    '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/';
 
 
 /*
@@ -28,7 +44,10 @@ $passwordRules = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?
 |--------------------------------------------------------------------------
 */
 
-if ($mode === 'forgot' && isset($_GET['restart'])) {
+if (
+    $mode === 'forgot' &&
+    isset($_GET['restart'])
+) {
 
     unset(
         $_SESSION['reset_username'],
@@ -40,19 +59,65 @@ if ($mode === 'forgot' && isset($_GET['restart'])) {
 
 /*
 |--------------------------------------------------------------------------
-| FORGOT PASSWORD STAGE
+| RESET PASSWORD STAGE
 |--------------------------------------------------------------------------
 |
-| email   = username + email form
-| otp     = OTP verification
-| newpass = new password form
+| IMPORTANT:
+|
+| When the user simply opens:
+|
+| login.php?action=forgot
+|
+| we ALWAYS start at the username/email screen.
 |
 */
 
-$resetStage = $_SESSION['reset_stage'] ?? 'email';
+$resetStage = 'email';
 
-if ($mode !== 'forgot') {
+
+/*
+|--------------------------------------------------------------------------
+| OPEN FORGOT PASSWORD PAGE
+|--------------------------------------------------------------------------
+|
+| GET = user is opening the page.
+|
+| Clear any old reset session so that an old "newpass" stage
+| cannot appear immediately.
+|
+*/
+
+if (
+    $mode === 'forgot' &&
+    $_SERVER['REQUEST_METHOD'] === 'GET'
+) {
+
+    unset(
+        $_SESSION['reset_username'],
+        $_SESSION['reset_email'],
+        $_SESSION['reset_stage']
+    );
+
     $resetStage = 'email';
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CONTINUE EXISTING RESET PROCESS
+|--------------------------------------------------------------------------
+|
+| POST = user is submitting one of the reset forms.
+|
+*/
+
+if (
+    $mode === 'forgot' &&
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+) {
+
+    $resetStage =
+        $_SESSION['reset_stage'] ?? 'email';
 }
 
 
@@ -69,12 +134,17 @@ try {
         $dbUser,
         $dbPass,
         [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_ERRMODE =>
+                PDO::ERRMODE_EXCEPTION,
+
+            PDO::ATTR_DEFAULT_FETCH_MODE =>
+                PDO::FETCH_ASSOC
         ]
     );
 
-    $pdo->exec("USE `$dbName`");
+    $pdo->exec(
+        "USE `$dbName`"
+    );
 
 } catch (PDOException $e) {
 
@@ -84,21 +154,17 @@ try {
             padding:3rem;
             color:#fca5a5;
             font-family:sans-serif;
-            background:#0f172a
+            background:#0f172a;
         ">
             <h2>Database Error</h2>
             <p>' .
-            htmlspecialchars($e->getMessage()) .
+            htmlspecialchars(
+                $e->getMessage()
+            ) .
             '</p>
             <p>
-                Run
-                <a
-                    href="install.php"
-                    style="color:#38bdf8"
-                >
-                    install.php
-                </a>
-                first.
+                Make sure MySQL is running and
+                the IMS database exists.
             </p>
         </div>'
     );
@@ -111,7 +177,9 @@ try {
 |--------------------------------------------------------------------------
 */
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+) {
 
 
     /*
@@ -120,24 +188,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     |--------------------------------------------------------------------------
     */
 
-    if ($mode === 'register') {
+    if (
+        $mode === 'register'
+    ) {
 
-        $username = trim(
-            $_POST['username'] ?? ''
-        );
+        $username =
+            trim(
+                $_POST['username'] ?? ''
+            );
 
-        $email = trim(
-            $_POST['email'] ?? ''
-        );
+        $email =
+            trim(
+                $_POST['email'] ?? ''
+            );
 
-        $password = $_POST['password'] ?? '';
+        $password =
+            $_POST['password'] ?? '';
 
-        $confirm = $_POST['confirm_password'] ?? '';
+        $confirm =
+            $_POST['confirm_password'] ?? '';
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $username === '' ||
-            $email === '' ||
             $password === '' ||
             $confirm === ''
         ) {
@@ -156,6 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'Username: 3-15 chars, letters & numbers.';
 
         } elseif (
+            $email !== '' &&
             !filter_var(
                 $email,
                 FILTER_VALIDATE_EMAIL
@@ -184,49 +264,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
+
             /*
             |--------------------------------------------------------------------------
-            | Check username OR email already exists
+            | CHECK EXISTING USERNAME
             |--------------------------------------------------------------------------
             */
 
-            $stmt = $pdo->prepare(
-                'SELECT COUNT(*)
-                 FROM users
-                 WHERE username=? OR email=?'
-            );
+            if (
+                $email !== ''
+            ) {
 
-            $stmt->execute([
-                $username,
-                $email
-            ]);
+                $stmt = $pdo->prepare(
+                    'SELECT COUNT(*)
+                     FROM users
+                     WHERE username=?
+                     OR email=?'
+                );
 
-            if ($stmt->fetchColumn() > 0) {
+                $stmt->execute([
+                    $username,
+                    $email
+                ]);
+
+            } else {
+
+                $stmt = $pdo->prepare(
+                    'SELECT COUNT(*)
+                     FROM users
+                     WHERE username=?'
+                );
+
+                $stmt->execute([
+                    $username
+                ]);
+            }
+
+
+            if (
+                $stmt->fetchColumn() > 0
+            ) {
 
                 $errorMessage =
                     'Username or email already in use.';
 
             } else {
 
-                $hash = password_hash(
-                    $password,
-                    PASSWORD_DEFAULT
-                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | HASH PASSWORD
+                |--------------------------------------------------------------------------
+                */
+
+                $hash =
+                    password_hash(
+                        $password,
+                        PASSWORD_DEFAULT
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CREATE STAFF ACCOUNT
+                |--------------------------------------------------------------------------
+                */
 
                 $pdo->prepare(
                     "INSERT INTO users
-                    (username, email, password_hash, role)
+                    (
+                        username,
+                        email,
+                        password_hash,
+                        role
+                    )
                     VALUES (?, ?, ?, 'staff')"
                 )->execute([
                     $username,
-                    $email,
+                    $email !== ''
+                        ? $email
+                        : null,
                     $hash
                 ]);
+
 
                 $successMessage =
                     'Staff account created! You can now log in.';
 
-                $mode = 'login';
+                $mode =
+                    'login';
             }
         }
     }
@@ -234,17 +360,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /*
     |--------------------------------------------------------------------------
-    | FORGOT PASSWORD - STEP 1
+    | FORGOT PASSWORD
+    | STEP 1 - USERNAME + EMAIL
     |--------------------------------------------------------------------------
-    |
-    | IMPORTANT:
-    |
-    | Username is checked ONLY against the users table.
-    |
-    | The email is NOT matched with the database email.
-    |
-    | The email entered by the user is ONLY used to receive OTP.
-    |
     */
 
     elseif (
@@ -252,33 +370,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resetStage === 'email'
     ) {
 
-        $username = trim(
-            $_POST['username'] ?? ''
-        );
+        $username =
+            trim(
+                $_POST['username'] ?? ''
+            );
 
-        $email = trim(
-            $_POST['email'] ?? ''
-        );
+        $email =
+            trim(
+                $_POST['email'] ?? ''
+            );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Validate username
+        | VALIDATE USERNAME
         |--------------------------------------------------------------------------
         */
 
-        if ($username === '') {
+        if (
+            $username === ''
+        ) {
 
             $errorMessage =
                 'Username is required.';
 
+
         /*
         |--------------------------------------------------------------------------
-        | Validate email
+        | VALIDATE EMAIL
         |--------------------------------------------------------------------------
         */
 
-        } elseif ($email === '') {
+        } elseif (
+            $email === ''
+        ) {
 
             $errorMessage =
                 'Email is required.';
@@ -295,12 +420,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
+
             /*
             |--------------------------------------------------------------------------
-            | CHECK USERNAME ONLY
+            | FIND USER BY USERNAME ONLY
             |--------------------------------------------------------------------------
             |
-            | We intentionally DO NOT use:
+            | IMPORTANT:
+            |
+            | We DO NOT check:
             |
             | WHERE username=? AND email=?
             |
@@ -309,7 +437,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             */
 
             $stmt = $pdo->prepare(
-                'SELECT id, username
+                'SELECT
+                    id,
+                    username
                  FROM users
                  WHERE username=?
                  LIMIT 1'
@@ -319,66 +449,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $username
             ]);
 
-            $user = $stmt->fetch();
+            $user =
+                $stmt->fetch();
 
 
             /*
             |--------------------------------------------------------------------------
-            | Username does not exist
+            | USERNAME DOES NOT EXIST
             |--------------------------------------------------------------------------
             */
 
-            if (!$user) {
+            if (
+                !$user
+            ) {
 
                 $errorMessage =
                     'Username not found.';
 
             } else {
 
-                /*
-                |--------------------------------------------------------------------------
-                | USERNAME EXISTS
-                |--------------------------------------------------------------------------
-                |
-                | Now generate OTP.
-                |
-                | The OTP will be sent to the email entered by the user.
-                |
-                */
-
-                $otp = random_int(
-                    100000,
-                    999999
-                );
-
 
                 /*
                 |--------------------------------------------------------------------------
-                | Hash OTP
+                | GENERATE OTP
                 |--------------------------------------------------------------------------
                 */
 
-                $otpHash = password_hash(
-                    (string)$otp,
-                    PASSWORD_DEFAULT
-                );
+                $otp =
+                    random_int(
+                        100000,
+                        999999
+                    );
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | OTP expires in 2 minutes
+                | HASH OTP
                 |--------------------------------------------------------------------------
                 */
 
-                $expiresAt = date(
-                    'Y-m-d H:i:s',
-                    time() + 120
-                );
+                $otpHash =
+                    password_hash(
+                        (string)$otp,
+                        PASSWORD_DEFAULT
+                    );
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Delete previous OTP for this email
+                | OTP EXPIRES IN 2 MINUTES
+                |--------------------------------------------------------------------------
+                */
+
+                $expiresAt =
+                    date(
+                        'Y-m-d H:i:s',
+                        time() + 120
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DELETE OLD OTP FOR THIS EMAIL
                 |--------------------------------------------------------------------------
                 */
 
@@ -392,13 +524,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 /*
                 |--------------------------------------------------------------------------
-                | Save new OTP
+                | INSERT NEW OTP
                 |--------------------------------------------------------------------------
                 */
 
                 $pdo->prepare(
                     'INSERT INTO otps
-                    (email, otp_hash, expires_at)
+                    (
+                        email,
+                        otp_hash,
+                        expires_at
+                    )
                     VALUES (?, ?, ?)'
                 )->execute([
                     $email,
@@ -420,43 +556,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     )
                 ) {
 
+
                     /*
                     |--------------------------------------------------------------------------
-                    | Store username separately
+                    | SAVE USERNAME
                     |--------------------------------------------------------------------------
                     |
-                    | This username determines which account gets reset.
+                    | This determines which account will eventually
+                    | have its password changed.
                     |
                     */
 
-                    $_SESSION['reset_username'] =
+                    $_SESSION[
+                        'reset_username'
+                    ] =
                         $username;
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Store email only for OTP verification
+                    | SAVE EMAIL
                     |--------------------------------------------------------------------------
+                    |
+                    | This is ONLY for OTP verification.
+                    |
                     */
 
-                    $_SESSION['reset_email'] =
+                    $_SESSION[
+                        'reset_email'
+                    ] =
                         $email;
 
 
-                    $_SESSION['reset_stage'] =
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MOVE TO OTP STAGE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $_SESSION[
+                        'reset_stage'
+                    ] =
                         'otp';
 
 
-                    $resetStage = 'otp';
+                    $resetStage =
+                        'otp';
 
 
                     $successMessage =
-                        'OTP sent to the email address you provided. It expires in 2 minutes.';
+                        'OTP sent successfully. Check your email.';
 
                 } else {
 
                     $errorMessage =
-                        'Could not send the email. Try again.';
+                        'Could not send the email. Please check your SMTP settings.';
                 }
             }
         }
@@ -465,10 +619,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /*
     |--------------------------------------------------------------------------
-    | FORGOT PASSWORD - STEP 2
-    |--------------------------------------------------------------------------
-    |
-    | VERIFY OTP
+    | FORGOT PASSWORD
+    | STEP 2 - VERIFY OTP
     |--------------------------------------------------------------------------
     */
 
@@ -478,18 +630,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ) {
 
         $username =
-            $_SESSION['reset_username'] ?? '';
+            $_SESSION[
+                'reset_username'
+            ] ?? '';
 
         $email =
-            $_SESSION['reset_email'] ?? '';
+            $_SESSION[
+                'reset_email'
+            ] ?? '';
 
         $otpInput =
-            trim($_POST['otp'] ?? '');
+            trim(
+                $_POST['otp'] ?? ''
+            );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Check reset session
+        | CHECK RESET SESSION
         |--------------------------------------------------------------------------
         */
 
@@ -509,12 +667,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
 
-            $resetStage = 'email';
+            $resetStage =
+                'email';
 
 
         /*
         |--------------------------------------------------------------------------
-        | Validate OTP format
+        | CHECK OTP FORMAT
         |--------------------------------------------------------------------------
         */
 
@@ -531,36 +690,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
+
             /*
             |--------------------------------------------------------------------------
-            | Get latest OTP for the email
+            | FIND OTP
             |--------------------------------------------------------------------------
             */
 
-            $stmt = $pdo->prepare(
-                'SELECT *
-                 FROM otps
-                 WHERE email=?
-                 ORDER BY id DESC
-                 LIMIT 1'
-            );
+            $stmt =
+                $pdo->prepare(
+                    'SELECT *
+                     FROM otps
+                     WHERE email=?
+                     ORDER BY id DESC
+                     LIMIT 1'
+                );
 
             $stmt->execute([
                 $email
             ]);
 
-            $row = $stmt->fetch();
+            $row =
+                $stmt->fetch();
 
 
             /*
             |--------------------------------------------------------------------------
-            | OTP doesn't exist or expired
+            | OTP DOES NOT EXIST OR EXPIRED
             |--------------------------------------------------------------------------
             */
 
             if (
                 !$row ||
-                strtotime($row['expires_at']) < time()
+                strtotime(
+                    $row['expires_at']
+                ) < time()
             ) {
 
                 $pdo->prepare(
@@ -581,7 +745,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
 
 
-                $_SESSION['reset_stage'] =
+                $_SESSION[
+                    'reset_stage'
+                ] =
                     'email';
 
 
@@ -591,7 +757,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /*
             |--------------------------------------------------------------------------
-            | OTP is incorrect
+            | WRONG OTP
             |--------------------------------------------------------------------------
             */
 
@@ -614,9 +780,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             } else {
 
+
                 /*
                 |--------------------------------------------------------------------------
-                | Delete used OTP
+                | DELETE USED OTP
                 |--------------------------------------------------------------------------
                 */
 
@@ -630,11 +797,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 /*
                 |--------------------------------------------------------------------------
-                | Move to new password
+                | MOVE TO NEW PASSWORD
                 |--------------------------------------------------------------------------
                 */
 
-                $_SESSION['reset_stage'] =
+                $_SESSION[
+                    'reset_stage'
+                ] =
                     'newpass';
 
 
@@ -651,10 +820,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /*
     |--------------------------------------------------------------------------
-    | FORGOT PASSWORD - STEP 3
-    |--------------------------------------------------------------------------
-    |
-    | SET NEW PASSWORD
+    | FORGOT PASSWORD
+    | STEP 3 - NEW PASSWORD
     |--------------------------------------------------------------------------
     */
 
@@ -665,30 +832,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /*
         |--------------------------------------------------------------------------
-        | Get username from session
+        | GET RESET USERNAME
         |--------------------------------------------------------------------------
-        |
-        | This is the username whose password will be changed.
-        |
         */
 
         $username =
-            $_SESSION['reset_username'] ?? '';
+            $_SESSION[
+                'reset_username'
+            ] ?? '';
 
         $email =
-            $_SESSION['reset_email'] ?? '';
+            $_SESSION[
+                'reset_email'
+            ] ?? '';
 
 
         $newPass =
-            $_POST['new_password'] ?? '';
+            $_POST[
+                'new_password'
+            ] ?? '';
 
         $confirm =
-            $_POST['confirm_password'] ?? '';
+            $_POST[
+                'confirm_password'
+            ] ?? '';
 
 
         /*
         |--------------------------------------------------------------------------
-        | Verify reset session
+        | CHECK RESET SESSION
         |--------------------------------------------------------------------------
         */
 
@@ -712,6 +884,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email';
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | REQUIRED FIELDS
+        |--------------------------------------------------------------------------
+        */
+
         } elseif (
             $newPass === '' ||
             $confirm === ''
@@ -720,6 +898,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorMessage =
                 'All fields required.';
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | PASSWORD RULES
+        |--------------------------------------------------------------------------
+        */
 
         } elseif (
             !preg_match(
@@ -732,6 +916,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'Password: 8+ chars, uppercase, lowercase, number, special char.';
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | PASSWORD MATCH
+        |--------------------------------------------------------------------------
+        */
+
         } elseif (
             $newPass !== $confirm
         ) {
@@ -742,72 +932,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Hash new password
-            |--------------------------------------------------------------------------
-            */
-
-            $hash = password_hash(
-                $newPass,
-                PASSWORD_DEFAULT
-            );
-
 
             /*
             |--------------------------------------------------------------------------
-            | UPDATE PASSWORD BY USERNAME
+            | CHECK USER STILL EXISTS
             |--------------------------------------------------------------------------
-            |
-            | IMPORTANT:
-            |
-            | We do NOT use email here.
-            |
-            | The email was only used for OTP.
-            |
             */
 
-            $stmt = $pdo->prepare(
-                'UPDATE users
-                 SET password_hash=?
-                 WHERE username=?'
-            );
-
+            $stmt =
+                $pdo->prepare(
+                    'SELECT id
+                     FROM users
+                     WHERE username=?
+                     LIMIT 1'
+                );
 
             $stmt->execute([
-                $hash,
                 $username
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Clear password reset session
-            |--------------------------------------------------------------------------
-            */
-
-            unset(
-                $_SESSION['reset_username'],
-                $_SESSION['reset_email'],
-                $_SESSION['reset_stage']
-            );
+            $user =
+                $stmt->fetch();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Return to login
-            |--------------------------------------------------------------------------
-            */
+            if (
+                !$user
+            ) {
 
-            $successMessage =
-                'Password reset successfully! You can now log in.';
+                $errorMessage =
+                    'User account no longer exists.';
+
+            } else {
 
 
-            $mode =
-                'login';
+                /*
+                |--------------------------------------------------------------------------
+                | HASH NEW PASSWORD
+                |--------------------------------------------------------------------------
+                */
 
-            $resetStage =
-                'email';
+                $hash =
+                    password_hash(
+                        $newPass,
+                        PASSWORD_DEFAULT
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE PASSWORD BY USERNAME ONLY
+                |--------------------------------------------------------------------------
+                |
+                | Notice:
+                |
+                | email is NOT used here.
+                |
+                */
+
+                $stmt =
+                    $pdo->prepare(
+                        'UPDATE users
+                         SET password_hash=?
+                         WHERE username=?'
+                    );
+
+
+                $stmt->execute([
+                    $hash,
+                    $username
+                ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CLEAR RESET SESSION
+                |--------------------------------------------------------------------------
+                */
+
+                unset(
+                    $_SESSION['reset_username'],
+                    $_SESSION['reset_email'],
+                    $_SESSION['reset_stage']
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RETURN TO LOGIN
+                |--------------------------------------------------------------------------
+                */
+
+                $successMessage =
+                    'Password reset successfully! You can now log in.';
+
+
+                $mode =
+                    'login';
+
+
+                $resetStage =
+                    'email';
+            }
         }
     }
 
@@ -821,11 +1046,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     else {
 
         $username =
-            trim($_POST['username'] ?? '');
+            trim(
+                $_POST['username'] ?? ''
+            );
 
         $password =
             $_POST['password'] ?? '';
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATE LOGIN
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $username === '' ||
@@ -837,18 +1070,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } else {
 
+
             /*
             |--------------------------------------------------------------------------
-            | Find user by username
+            | FIND USER
             |--------------------------------------------------------------------------
             */
 
-            $stmt = $pdo->prepare(
-                'SELECT *
-                 FROM users
-                 WHERE username=?
-                 LIMIT 1'
-            );
+            $stmt =
+                $pdo->prepare(
+                    'SELECT *
+                     FROM users
+                     WHERE username=?
+                     LIMIT 1'
+                );
 
             $stmt->execute([
                 $username
@@ -860,7 +1095,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /*
             |--------------------------------------------------------------------------
-            | Verify password
+            | VERIFY PASSWORD
             |--------------------------------------------------------------------------
             */
 
@@ -872,25 +1107,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 )
             ) {
 
+
                 /*
                 |--------------------------------------------------------------------------
-                | Create login session
+                | LOGIN SESSION
                 |--------------------------------------------------------------------------
                 */
 
-                $_SESSION['user_id'] =
+                $_SESSION[
+                    'user_id'
+                ] =
                     (int)$user['id'];
 
-                $_SESSION['username'] =
+                $_SESSION[
+                    'username'
+                ] =
                     $user['username'];
 
-                $_SESSION['role'] =
+                $_SESSION[
+                    'role'
+                ] =
                     $user['role'];
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Redirect
+                | REDIRECT
                 |--------------------------------------------------------------------------
                 */
 
@@ -899,7 +1141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     (
                         $user['role'] === 'admin'
                             ? 'dashboard.php'
-                            : 'Staff_dashboard.php'
+                            : 'staff_dashboard.php'
                     )
                 );
 
@@ -917,15 +1159,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /*
 |--------------------------------------------------------------------------
-| PAGE TITLE
+| PAGE TITLES
 |--------------------------------------------------------------------------
 */
 
 $pageTitles = [
-    'login' => 'Login',
-    'register' => 'Create Account',
-    'forgot' => 'Reset Password'
+
+    'login' =>
+        'Login',
+
+    'register' =>
+        'Create Account',
+
+    'forgot' =>
+        'Reset Password'
 ];
+
 
 $pageTitle =
     $pageTitles[$mode];
@@ -947,7 +1196,9 @@ $pageTitle =
 
     <title>
         <?php
-        echo htmlspecialchars($pageTitle);
+        echo htmlspecialchars(
+            $pageTitle
+        );
         ?>
         | IMS Nepal
     </title>
@@ -966,18 +1217,31 @@ $pageTitle =
 <div class="lc">
 
 
+    <!-- =========================================================
+         TITLE
+    ========================================================== -->
+
     <h2>
 
         <?php
-        echo htmlspecialchars($pageTitle);
+        echo htmlspecialchars(
+            $pageTitle
+        );
         ?>
 
     </h2>
 
 
+    <!-- =========================================================
+         SUBTITLE
+    ========================================================== -->
+
     <p class="sub">
 
-        <?php if ($mode === 'register'): ?>
+
+        <?php if (
+            $mode === 'register'
+        ): ?>
 
             Create your account
 
@@ -1012,14 +1276,17 @@ $pageTitle =
 
         <?php endif; ?>
 
+
     </p>
 
 
     <!-- =========================================================
-         ERROR MESSAGE
+         ERROR
     ========================================================== -->
 
-    <?php if ($errorMessage): ?>
+    <?php if (
+        $errorMessage
+    ): ?>
 
         <div class="msg me">
 
@@ -1035,10 +1302,12 @@ $pageTitle =
 
 
     <!-- =========================================================
-         SUCCESS MESSAGE
+         SUCCESS
     ========================================================== -->
 
-    <?php if ($successMessage): ?>
+    <?php if (
+        $successMessage
+    ): ?>
 
         <div class="msg ms">
 
@@ -1053,16 +1322,25 @@ $pageTitle =
     <?php endif; ?>
 
 
+    <!-- =========================================================
+         FORM
+    ========================================================== -->
+
     <form
         action="login.php?action=<?php
-        echo htmlspecialchars($mode);
+            echo htmlspecialchars(
+                $mode
+            );
         ?>"
         method="POST"
         autocomplete="off"
     >
 
 
-        <?php if ($mode === 'register'): ?>
+        <?php if (
+            $mode === 'register'
+        ): ?>
+
 
             <!-- =================================================
                  REGISTER
@@ -1071,9 +1349,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Username
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <input
                     type="text"
@@ -1094,13 +1378,12 @@ $pageTitle =
 
                 <label>
                     Email
-                    <span class="req">*</span>
                 </label>
+
 
                 <input
                     type="email"
                     name="email"
-                    required
                     value="<?php
                     echo htmlspecialchars(
                         $_POST['email'] ?? ''
@@ -1114,9 +1397,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Password
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <div class="pw-input-wrap">
 
@@ -1126,6 +1415,7 @@ $pageTitle =
                         name="password"
                         required
                     >
+
 
                     <button
                         type="button"
@@ -1137,9 +1427,13 @@ $pageTitle =
 
                 </div>
 
+
                 <small class="ph">
-                    8+ chars, uppercase, lowercase,
-                    number, special char.
+
+                    8+ chars, uppercase,
+                    lowercase, number,
+                    special char.
+
                 </small>
 
             </div>
@@ -1148,9 +1442,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Confirm Password
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <div class="pw-input-wrap">
 
@@ -1160,6 +1460,7 @@ $pageTitle =
                         name="confirm_password"
                         required
                     >
+
 
                     <button
                         type="button"
@@ -1179,16 +1480,24 @@ $pageTitle =
             $resetStage === 'email'
         ): ?>
 
+
             <!-- =================================================
-                 FORGOT PASSWORD - USERNAME + EMAIL
+                 FORGOT PASSWORD
+                 STEP 1
             ================================================== -->
 
             <div class="fg">
 
                 <label>
+
                     Username
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <input
                     type="text"
@@ -1203,9 +1512,12 @@ $pageTitle =
                     ?>"
                 >
 
+
                 <small class="ph">
-                    Enter the username of the account
-                    whose password you want to reset.
+
+                    Enter the username whose
+                    password you want to reset.
+
                 </small>
 
             </div>
@@ -1214,9 +1526,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Email for OTP
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <input
                     type="email"
@@ -1230,10 +1548,13 @@ $pageTitle =
                     ?>"
                 >
 
+
                 <small class="ph">
-                    This email is only used to receive
-                    the OTP. It does not need to match
-                    the account email.
+
+                    This email is only used to
+                    receive the OTP. It does not
+                    need to match the account email.
+
                 </small>
 
             </div>
@@ -1244,16 +1565,24 @@ $pageTitle =
             $resetStage === 'otp'
         ): ?>
 
+
             <!-- =================================================
                  OTP
+                 STEP 2
             ================================================== -->
 
             <div class="fg">
 
                 <label>
+
                     OTP Code
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <input
                     type="text"
@@ -1267,14 +1596,21 @@ $pageTitle =
                     placeholder="6-digit code"
                 >
 
+
                 <small class="ph">
+
                     OTP sent to
+
                     <?php
                     echo htmlspecialchars(
-                        $_SESSION['reset_email'] ?? ''
+                        $_SESSION[
+                            'reset_email'
+                        ] ?? ''
                     );
                     ?>.
+
                     Valid for 2 minutes.
+
                 </small>
 
             </div>
@@ -1285,16 +1621,24 @@ $pageTitle =
             $resetStage === 'newpass'
         ): ?>
 
+
             <!-- =================================================
                  NEW PASSWORD
+                 STEP 3
             ================================================== -->
 
             <div class="fg">
 
                 <label>
+
                     New Password
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <div class="pw-input-wrap">
 
@@ -1304,6 +1648,7 @@ $pageTitle =
                         name="new_password"
                         required
                     >
+
 
                     <button
                         type="button"
@@ -1315,9 +1660,13 @@ $pageTitle =
 
                 </div>
 
+
                 <small class="ph">
-                    8+ chars, uppercase, lowercase,
-                    number, special char.
+
+                    8+ chars, uppercase,
+                    lowercase, number,
+                    special char.
+
                 </small>
 
             </div>
@@ -1326,9 +1675,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Confirm Password
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <div class="pw-input-wrap">
 
@@ -1338,6 +1693,7 @@ $pageTitle =
                         name="confirm_password"
                         required
                     >
+
 
                     <button
                         type="button"
@@ -1354,6 +1710,7 @@ $pageTitle =
 
         <?php else: ?>
 
+
             <!-- =================================================
                  LOGIN
             ================================================== -->
@@ -1361,9 +1718,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Username
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <input
                     type="text"
@@ -1383,9 +1746,15 @@ $pageTitle =
             <div class="fg">
 
                 <label>
+
                     Password
-                    <span class="req">*</span>
+
+                    <span class="req">
+                        *
+                    </span>
+
                 </label>
+
 
                 <div class="pw-input-wrap">
 
@@ -1396,6 +1765,7 @@ $pageTitle =
                         required
                         autocomplete="current-password"
                     >
+
 
                     <button
                         type="button"
@@ -1409,6 +1779,7 @@ $pageTitle =
 
             </div>
 
+
         <?php endif; ?>
 
 
@@ -1419,7 +1790,10 @@ $pageTitle =
         <div class="fa">
 
 
-            <?php if ($mode === 'register'): ?>
+            <?php if (
+                $mode === 'register'
+            ): ?>
+
 
                 <a
                     href="login.php?action=login"
@@ -1427,6 +1801,7 @@ $pageTitle =
                 >
                     Back to Login
                 </a>
+
 
                 <button
                     type="submit"
@@ -1441,12 +1816,14 @@ $pageTitle =
                 $resetStage === 'email'
             ): ?>
 
+
                 <a
                     href="login.php?action=login"
                     class="sl"
                 >
                     Back to Login
                 </a>
+
 
                 <button
                     type="submit"
@@ -1461,12 +1838,14 @@ $pageTitle =
                 $resetStage === 'otp'
             ): ?>
 
+
                 <a
                     href="login.php?action=forgot&restart=1"
                     class="sl"
                 >
-                    Start Over
+                    Back
                 </a>
+
 
                 <button
                     type="submit"
@@ -1481,12 +1860,14 @@ $pageTitle =
                 $resetStage === 'newpass'
             ): ?>
 
+
                 <a
                     href="login.php?action=login"
                     class="sl"
                 >
                     Back to Login
                 </a>
+
 
                 <button
                     type="submit"
@@ -1498,12 +1879,14 @@ $pageTitle =
 
             <?php else: ?>
 
+
                 <a
                     href="login.php?action=register"
                     class="sl"
                 >
                     Create account
                 </a>
+
 
                 <button
                     type="submit"
@@ -1512,7 +1895,9 @@ $pageTitle =
                     Log In
                 </button>
 
+
             <?php endif; ?>
+
 
         </div>
 
@@ -1521,7 +1906,9 @@ $pageTitle =
              FORGOT PASSWORD LINK
         ========================================================== -->
 
-        <?php if ($mode === 'login'): ?>
+        <?php if (
+            $mode === 'login'
+        ): ?>
 
             <div class="fr">
 
@@ -1539,24 +1926,25 @@ $pageTitle =
 
     </form>
 
+
 </div>
 
 
 <!-- ===============================================================
-     PASSWORD SHOW / HIDE
+     SHOW / HIDE PASSWORD
 ================================================================ -->
 
 <script>
 
 document
     .querySelectorAll('.pw-toggle')
-    .forEach(function (button) {
+    .forEach(function(button) {
 
         button.addEventListener(
             'click',
-            function () {
+            function() {
 
-                var target =
+                const target =
                     document.getElementById(
                         button.dataset.target
                     );
@@ -1565,11 +1953,13 @@ document
                     return;
                 }
 
+
                 if (
                     target.type === 'password'
                 ) {
 
-                    target.type = 'text';
+                    target.type =
+                        'text';
 
                     button.textContent =
                         'Hide';
@@ -1582,8 +1972,10 @@ document
                     button.textContent =
                         'Show';
                 }
+
             }
         );
+
     });
 
 </script>

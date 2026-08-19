@@ -259,7 +259,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $qty = trim($_POST['quantity'] ?? '');
         $up = trim($_POST['unit_price'] ?? '');
         $note = trim($_POST['note'] ?? '');
-        $sd = trim($_POST['sale_date'] ?? date('Y-m-d'));
+        $sd = date('Y-m-d');
         $cn = trim($_POST['customer_name'] ?? '');
         $cp = trim($_POST['customer_phone'] ?? '');
         $p = getProduct($pdo, $pid);
@@ -272,9 +272,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $view = 'sale_add';
         } elseif ((int)$qty > (int)$p['quantity']) {
             $errorMessage = 'Not enough stock. Available: ' . $p['quantity'] . '.';
-            $view = 'sale_add';
-        } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sd)) {
-            $errorMessage = 'Enter a valid date (YYYY-MM-DD).';
             $view = 'sale_add';
         } else {
             $qi = (int)$qty;

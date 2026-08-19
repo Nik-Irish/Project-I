@@ -28,3 +28,17 @@ body { min-height: 100vh; font-family: "Segoe UI", system-ui, sans-serif; backgr
 .sl, .fl { color: #38bdf8; font-size: .8rem; text-decoration: none; }
 .sl:hover, .fl:hover { text-decoration: underline; }
 .fr { margin-top: .75rem; text-align: center; }
+
+/* Nirman palette */
+:root { --navy: #112D4E; --blue: #3F72AF; --mist: #DBE2EF; --white: #F9F7F7; }
+body { background: var(--navy); color: var(--mist); }
+.lc { background: rgba(17, 45, 78, .96); border-color: rgba(219, 226, 239, .2); }
+.lc h2 { color: var(--white); }
+.sub, .fg label { color: var(--mist); }
+.fg input { color: var(--white); background: #0d263f; border-color: rgba(219, 226, 239, .3); }
+.fg input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(63, 114, 175, .3); }
+.pw-toggle { background: rgba(63, 114, 175, .25); color: var(--white); }
+.pw-toggle:hover { background: var(--blue); }
+.bs { color: var(--white); background: var(--blue); }
+.bs:hover { box-shadow: 0 6px 16px rgba(63, 114, 175, .45); }
+.sl, .fl { color: var(--mist); }
