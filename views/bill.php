@@ -18,10 +18,10 @@ if (isset($billSale['_subtotal'])) {
 ?>
 
 <div class="bill-print">
-    <h1>Nirman</h1>
+    <h1>IMS Nepal</h1>
     <div class="bill-title">INVOICE</div>
     <div class="bill-company-info">
-        Phone: +977 9705217752 &nbsp;|&nbsp; Email: sales@nirmanirm.com
+        Phone: +977 9705217752 &nbsp;|&nbsp; Email: sales@IMSFirm.com
     </div>
     <hr class="bill-divider">
 

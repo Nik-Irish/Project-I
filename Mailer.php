@@ -55,7 +55,7 @@ function sendOtpMail($email, $otp)
         |
         */
 
-        $mail->Password = 'ildh nnid yehh wesy';
+        $mail->Password = 'smbafhafuuyblbir';
 
 
         /*
@@ -68,7 +68,7 @@ function sendOtpMail($email, $otp)
             PHPMailer::ENCRYPTION_STARTTLS;
 
         $mail->Port = 587;
-
+     
 
         /*
         |--------------------------------------------------------------------------
