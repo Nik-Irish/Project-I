@@ -87,7 +87,7 @@ function sendOtpMail($email, $otp)
 
         $mail->setFrom(
             'nikrishdulal01@gmail.com',
-            'IMS Nepal(Nirman)'
+            'IMS Nepal'
         );
 
 
@@ -121,7 +121,7 @@ function sendOtpMail($email, $otp)
         */
 
         $mail->Subject =
-            'IMS Nepal(Nirman) - Password Reset OTP';
+            'IMS Nepal - Password Reset OTP';
 
 
         /*
@@ -150,7 +150,7 @@ function sendOtpMail($email, $otp)
                     margin-bottom: 10px;
                     color: #0f172a;
                 ">
-                    IMS Nepal(Nirman)
+                    IMS Nepal
                 </h2>
 
                 <p>
@@ -198,7 +198,7 @@ function sendOtpMail($email, $otp)
         */
 
         $mail->AltBody =
-            "IMS Nepal(Nirman)\n\n" .
+            "IMS Nepal\n\n" .
             "Your password reset OTP is: " .
             $otp .
             "\n\n" .

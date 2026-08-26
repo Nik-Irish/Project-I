@@ -647,7 +647,7 @@ body {
     .search-form input[type="search"] { min-width: 0; flex: 1; }
 }
 
-/* ── Nirman palette ──────────────────────────────────────────────────────── */
+/* ── IMS Nepal palette ───────────────────────────────────────────────────── */
 :root {
     --navy: #112D4E;
     --blue: #3F72AF;
@@ -690,6 +690,11 @@ body { background: var(--navy); color: var(--mist); }
 .form-group label, .notif-banner-list li { color: var(--mist); }
 .pw-toggle { color: var(--blue); }
 .pw-toggle:hover { color: var(--white); }
+.stat-card {
+    background: #ffffff;
+    border-color: #dbe2ef;
+}
+.stat-card .stat-label { color: #5b4636; }
 
 .app.nav-hidden .sidebar {
     width: 0 !important;

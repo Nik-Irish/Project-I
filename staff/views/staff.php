@@ -7,7 +7,7 @@
 ?>
 
 <!-- ═══════ Add Staff User ═══════ -->
-<div class="form-card" style="margin-bottom:1.5rem;">
+<div class="form-card add-staff-card" style="margin-bottom:1.5rem;">
     <h2>Add Staff User</h2>
     <form method="POST" action="dashboard.php?view=staff">
         <input type="hidden" name="action" value="staff_create">
@@ -20,8 +20,6 @@
                 <label>Password</label>
                 <div class="pw-input-wrap">
                     <input type="password" name="password" id="staff-password-add" required>
-                    <button type="button" class="pw-toggle"
-                            data-target="staff-password-add">Show</button>
                 </div>
             </div>
         </div>
@@ -134,6 +132,24 @@
 
 <!-- ═══════ Styles ═══════ -->
 <style>
+    .add-staff-card {
+        background: #f5fffa;
+        border-color: #dbe2ef;
+    }
+    .add-staff-card h2,
+    .add-staff-card .form-group label {
+        color: #112d4e;
+    }
+    .add-staff-card .form-group input {
+        color: #112d4e;
+        background: #eef6ff;
+        border-color: #9fb9d6;
+    }
+    .add-staff-card .form-group input:focus {
+        border-color: #3f72af;
+        box-shadow: 0 0 0 3px rgba(63, 114, 175, .2);
+    }
+
     /* Password wrapper (add form + inline edit) */
     .pw-input-wrap {
         position: relative;

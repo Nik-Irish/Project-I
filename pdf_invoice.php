@@ -48,7 +48,7 @@ function downloadInvoicePdf(array $sale): void {
 </head>
 <body>
 
-<h2>Nirman</h2>
+<h2>IMS Nepal</h2>
 <p class="center small">Ph: +977 9705217752 | sales@nirmanirm.com</p>
 
 <div class="line"></div>

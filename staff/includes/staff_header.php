@@ -12,13 +12,13 @@ $view = $view ?? 'list';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($pageTitle); ?> | Nirman Staff</title>
+    <title><?php echo htmlspecialchars($pageTitle); ?> | IMS Nepal Staff</title>
     <link rel="stylesheet" href="dashboard-style.css">
 </head>
 <body>
 <div class="app">
     <aside class="sidebar">
-        <a href="Staff_dashboard.php?view=list" class="brand brand-link">Nirman</a>
+        <a href="Staff_dashboard.php?view=list" class="brand brand-link">IMS Nepal</a>
         <nav class="nav">
             <a href="Staff_dashboard.php?view=list"
                class="nav-link <?php echo $view === 'list' ? 'active' : ''; ?>">

@@ -13,7 +13,7 @@ $unreadNotifications = $unreadNotifications ?? 0;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($pageTitle); ?> | Nirman</title>
+    <title><?php echo htmlspecialchars($pageTitle); ?> | IMS Nepal</title>
     <link rel="stylesheet" href="dashboard-style.css">
 </head>
 <body>
@@ -21,7 +21,7 @@ $unreadNotifications = $unreadNotifications ?? 0;
 
     <!-- ═══════ SIDEBAR ═══════ -->
     <aside class="sidebar">
-        <a href="dashboard.php?view=list" class="brand brand-link">Nirman</a>
+        <a href="dashboard.php?view=list" class="brand brand-link">IMS Nepal</a>
 
         <nav class="nav">
             <a href="dashboard.php?view=list"

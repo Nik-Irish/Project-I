@@ -167,17 +167,6 @@ if ($ok) {
 <head>
     <meta charset="UTF-8">
     <title>IMS Nepal — Installation Failed</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: "Segoe UI", system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .box { max-width: 560px; width: 100%; background: rgba(30,41,59,.95); border: 1px solid rgba(148,163,184,.15); border-radius: 12px; padding: 1.75rem; }
-        h1 { font-size: 1.3rem; color: #fca5a5; margin-bottom: 1rem; }
-        ul { list-style: none; display: flex; flex-direction: column; gap: .4rem; }
-        li { color: #94a3b8; font-size: .85rem; }
-        a { color: #38bdf8; }
-        .hint { color: #64748b; font-size: .8rem; margin-top: 1rem; line-height: 1.5; }
-        .retry { display: inline-block; margin-top: 1rem; padding: .5rem 1rem; background: rgba(239,68,68,.2); border: 1px solid rgba(239,68,68,.4); color: #fca5a5; border-radius: 8px; text-decoration: none; font-size: .85rem; }
-    </style>
 </head>
 <body>
 <div class="box">

@@ -6,6 +6,11 @@
  *                       when freshly generated; otherwise we back-calculate)
  */
 
+if (!is_array($billSale)) {
+    echo '<div class="msg msg-error">Bill details are unavailable.</div>';
+    return;
+}
+
 if (isset($billSale['_subtotal'])) {
     $bSub   = (float)$billSale['_subtotal'];
     $bTax   = (float)$billSale['_tax'];
