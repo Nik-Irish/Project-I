@@ -20,6 +20,7 @@
                     <th>Qty</th>
                     <th>Total</th>
                     <th>Date</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,6 +31,10 @@
                     <td><?php echo (int)$sale['quantity']; ?></td>
                     <td>Rs.<?php echo number_format((float)$sale['total'], 2); ?></td>
                     <td><?php echo htmlspecialchars($sale['sale_date']); ?></td>
+                    <td>
+                        <a href="Staff_dashboard.php?download=pdf&sale_id=<?php echo (int)$sale['id']; ?>"
+                           class="btn btn-sm btn-secondary">PDF</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>

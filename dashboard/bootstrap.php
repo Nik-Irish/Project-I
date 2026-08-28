@@ -1,0 +1,79 @@
+<?php
+/**
+ * dashboard/bootstrap.php — Request state & GET routing.
+ * Extracted from dashboard.php. Do not open directly — included by dashboard.php.
+ *
+ * Helper functions used: downloadInvoicePdf(), getProduct(), getSale(),
+ *                        getStaff(), loadLists()
+ *
+ * Context variables provided by dashboard.php:
+ *
+ * @var PDO $pdo Database connection (config/db.php)
+ *
+ * Variables this file sets for the rest of the request:
+ *     $view, $errorMessage, $successMessage, $editProduct,
+ *     $detailProduct, $billSale, $editStaff,
+ *     $products, $sales, $notifications, $staffUsers
+ */
+
+if (!defined('DASHBOARD_CONTROLLER')) {
+    http_response_code(403);
+    exit('Direct access not allowed.');
+}
+
+$allowedViews = ['list', 'add', 'edit', 'sales', 'sale_add', 'inventory', 'report', 'notifications', 'bill', 'staff'];
+$view = $_GET['view'] ?? 'list';
+if (!in_array($view, $allowedViews, true)) {
+    $view = 'list';
+}
+
+$errorMessage = '';
+$successMessage = '';
+$editProduct = null;
+$detailProduct = null;
+$billSale = null;
+$editStaff = null;
+
+[$products, $sales, $notifications, $staffUsers] = loadLists($pdo);
+
+// download bill as pdf
+if (($_GET['download'] ?? '') === 'pdf' && isset($_GET['sale_id'])) {
+    $dl = getSale($pdo, (int)$_GET['sale_id']);
+    if (!$dl) {
+        http_response_code(404);
+        echo 'Bill not found.';
+        exit;
+    }
+    downloadInvoicePdf($dl);
+}
+
+if ($view === 'bill' && isset($_GET['id'])) {
+    $billSale = getSale($pdo, (int)$_GET['id']);
+    if (!$billSale) {
+        $errorMessage = 'Bill not found.';
+        $view = 'sales';
+    }
+}
+
+if ($view === 'edit' && isset($_GET['id'])) {
+    $editProduct = getProduct($pdo, (int)$_GET['id']);
+    if (!$editProduct) {
+        $errorMessage = 'Product not found.';
+        $view = 'list';
+    }
+}
+
+if ($view === 'inventory' && isset($_GET['id'])) {
+    $detailProduct = getProduct($pdo, (int)$_GET['id']);
+    if (!$detailProduct) {
+        $errorMessage = 'Product not found.';
+        $view = 'list';
+    }
+}
+
+if ($view === 'staff' && isset($_GET['edit'])) {
+    $editStaff = getStaff($pdo, (int)$_GET['edit']);
+    if (!$editStaff) {
+        $errorMessage = 'Staff account not found.';
+    }
+}

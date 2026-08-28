@@ -130,96 +130,74 @@
     <?php endif; ?>
 </div>
 
-<!-- ═══════ Styles ═══════ -->
+<!-- View-specific styles (small rules moved from dashboard-style.css) -->
 <style>
-    .add-staff-card {
-        background: #f5fffa;
-        border-color: #dbe2ef;
-    }
-    .add-staff-card h2,
-    .add-staff-card .form-group label {
-        color: #112d4e;
-    }
-    .add-staff-card .form-group input {
-        color: #112d4e;
-        background: #eef6ff;
-        border-color: #9fb9d6;
-    }
-    .add-staff-card .form-group input:focus {
-        border-color: #3f72af;
-        box-shadow: 0 0 0 3px rgba(63, 114, 175, .2);
-    }
+.add-staff-card {
+  background: #f5fffa;
+  border-color: #dbe2ef;
+}
+.add-staff-card h2,
+.add-staff-card .form-group label {
+  color: #112d4e;
+}
+.add-staff-card .form-group input {
+  color: #112d4e;
+  background: #eef6ff;
+  border-color: #9fb9d6;
+}
+.add-staff-card .form-group input:focus {
+  border-color: #3f72af;
+  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.2);
+}
 
-    /* Password wrapper (add form + inline edit) */
-    .pw-input-wrap {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-    .pw-input-wrap input {
-        flex: 1;
-        padding-right: 3.5rem;
-    }
-    .pw-toggle {
-        position: absolute;
-        right: .5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        background: transparent;
-        border: none;
-        color: #3F72AF;
-        font-size: .78rem;
-        font-weight: 600;
-        cursor: pointer;
-        padding: .25rem .5rem;
-        font-family: inherit;
-    }
-    .pw-toggle:hover { color: #F9F7F7; }
+/* Password wrapper (add form + inline edit) */
+.pw-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pw-input-wrap input {
+  flex: 1;
+  padding-right: 3.5rem;
+}
 
-    /* Add Staff button full-width */
-    .btn-block {
-        display: block;
-        width: 100%;
-        margin-top: 1rem;
-        padding: .7rem 1rem;
-    }
+.pw-toggle:hover {
+  color: #f9f7f7;
+}
 
-    /* Inline edit row */
-    .editing-row td {
-        background: rgba(63, 114, 175, .15);
-    }
-    .inline-edit-form {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: .5rem;
-    }
-    .edit-input {
-        padding: .4rem .6rem;
-        font-size: .85rem;
-        color: #F9F7F7;
-        background: #0d263f;
-        border: 1px solid rgba(219, 226, 239, .3);
-        border-radius: 6px;
-        outline: none;
-        font-family: inherit;
-    }
-    .edit-input:focus {
-        border-color: #3F72AF;
-        box-shadow: 0 0 0 3px rgba(63, 114, 175, .3);
-    }
-    .edit-username { width: 140px; }
-    .edit-pw-wrap  { width: 240px; }
-    .edit-pw-wrap input { width: 100%; }
-    .staff-password-form { display: flex; align-items: center; gap: .4rem; }
-    .staff-password-wrap { width: 190px; }
-    .staff-password-input { width: 100%; padding: .4rem .6rem; font-size: .82rem; color: #F9F7F7; background: #0d263f; border: 1px solid rgba(219, 226, 239, .3); border-radius: 6px; outline: none; font-family: inherit; }
-    .staff-password-input:focus { border-color: #3F72AF; box-shadow: 0 0 0 3px rgba(63, 114, 175, .3); }
-    .staff-password-input::placeholder { color: #DBE2EF; }
-    @media (max-width: 760px) {
-        .staff-password-form { align-items: stretch; flex-direction: column; }
-        .staff-password-wrap { width: 100%; }
-    }
+.editing-row td {
+  background: rgba(63, 114, 175, 0.15);
+}
+
+.edit-input:focus {
+  border-color: #3f72af;
+  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+}
+.edit-username {
+  width: 140px;
+}
+.edit-pw-wrap {
+  width: 240px;
+}
+.edit-pw-wrap input {
+  width: 100%;
+}
+.staff-password-form {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.staff-password-wrap {
+  width: 190px;
+}
+
+.staff-password-input:focus {
+  border-color: #3f72af;
+  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+}
+.staff-password-input::placeholder {
+  color: #dbe2ef;
+}
 </style>
 
 <!-- ═══════ Password toggle script ═══════ -->

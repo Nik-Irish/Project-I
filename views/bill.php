@@ -4,12 +4,16 @@
  *
  * Requires: $billSale  (may contain _subtotal, _tax, _total keys
  *                       when freshly generated; otherwise we back-calculate)
+ * Optional: $dashboardScript — controller that hosts this view
+ *           ('dashboard.php' by default; 'Staff_dashboard.php' for staff)
  */
 
 if (!is_array($billSale)) {
     echo '<div class="msg msg-error">Bill details are unavailable.</div>';
     return;
 }
+
+$dashboardScript = $dashboardScript ?? 'dashboard.php';
 
 if (isset($billSale['_subtotal'])) {
     $bSub   = (float)$billSale['_subtotal'];
@@ -21,6 +25,47 @@ if (isset($billSale['_subtotal'])) {
     $bTax   = round($bTotal - $bSub, 2);
 }
 ?>
+
+<!-- View-specific styles (small rules moved from dashboard-style.css) -->
+<style>
+.bill-print .bill-divider {
+  border: none;
+  border-top: 2px solid #334155;
+  margin: 0.7rem 0;
+}
+
+.bill-print table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.7rem;
+}
+
+
+.bill-print td {
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.88rem;
+}
+
+.bill-print .bill-totals {
+  margin-top: 0.5rem;
+  text-align: right;
+}
+.bill-print .bill-totals table {
+  width: auto;
+  margin-left: auto;
+}
+.bill-print .bill-totals td {
+  border: none;
+  padding: 0.2rem 0.5rem;
+}
+
+.bill-print .grand-total td {
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-top: 2px solid #334155;
+}
+</style>
 
 <div class="bill-print">
     <h1>IMS Nepal</h1>
@@ -97,10 +142,10 @@ if (isset($billSale['_subtotal'])) {
 
     <!-- Action buttons (hidden on print) -->
     <div class="form-actions no-print" style="margin-top:1rem;">
-        <a href="dashboard.php?download=pdf&sale_id=<?php echo (int)$billSale['id']; ?>"
+        <a href="<?php echo htmlspecialchars($dashboardScript); ?>?download=pdf&sale_id=<?php echo (int)$billSale['id']; ?>"
            class="btn btn-primary">Download PDF</a>
         <button onclick="window.print()" class="btn btn-secondary">Print</button>
-        <a href="dashboard.php?view=sales" class="btn btn-ghost">All Sales</a>
-        <a href="dashboard.php?view=list"  class="btn btn-ghost">Products</a>
+        <a href="<?php echo htmlspecialchars($dashboardScript); ?>?view=sales" class="btn btn-ghost">All Sales</a>
+        <a href="<?php echo htmlspecialchars($dashboardScript); ?>?view=list"  class="btn btn-ghost">Products</a>
     </div>
 </div>

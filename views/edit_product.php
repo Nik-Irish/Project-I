@@ -4,6 +4,10 @@
  *
  * Requires: $editProduct (associative array)
  */
+
+if (!is_array($editProduct)) {
+    return;
+}
 ?>
 <div class="form-card">
     <h2>Edit Product #<?php echo (int)$editProduct['id']; ?></h2>
@@ -16,20 +20,20 @@
         <div class="form-grid">
             <div class="form-group">
                 <label>Product Name <span class="req">*</span></label>
-                <input type="text" name="name" required
-                       value="<?php echo htmlspecialchars($editProduct['name']); ?>">
+                <input type="text" name="name" required readonly
+                       value="<?php echo htmlspecialchars((string)($editProduct['name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
             </div>
 
             <div class="form-group">
                 <label>Product-ID <span class="req">*</span></label>
-                <input type="text" name="sku" required
-                       value="<?php echo htmlspecialchars($editProduct['sku']); ?>">
+                <input type="text" name="sku" required readonly
+                       value="<?php echo htmlspecialchars((string)($editProduct['sku'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
             </div>
 
             <div class="form-group">
                 <label>Category</label>
-                <input type="text" name="category"
-                       value="<?php echo htmlspecialchars($editProduct['category']); ?>">
+                <input type="text" name="category" readonly
+                       value="<?php echo htmlspecialchars((string)($editProduct['category'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
             </div>
 
             <div class="form-group">
