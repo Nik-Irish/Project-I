@@ -41,7 +41,7 @@ if (!defined('DASHBOARD_CONTROLLER')) {
                     <strong><?php echo htmlspecialchars($bn['title'] ?? 'Alert'); ?>:</strong>
                     <?php echo htmlspecialchars($bn['message'] ?? ''); ?>
                     <?php if (!empty($bn['product_id'])): ?>
-                        <a href="dashboard.php?view=inventory&id=<?php echo (int)$bn['product_id']; ?>">View</a>
+                        <a href="dashboard.php?view=inventory&id=<?php echo urlencode($bn['product_id']); ?>">View</a>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

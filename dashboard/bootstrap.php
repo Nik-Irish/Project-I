@@ -61,7 +61,11 @@ if ($view === 'edit' && isset($_GET['id'])) {
 }
 
 if ($view === 'inventory' && isset($_GET['id'])) {
-    $detailProduct = getProduct($pdo, (int)$_GET['id']);
+    // accept either the internal numeric id or the Product-ID code (e.g. B-33)
+    $idParam = trim((string)$_GET['id']);
+    $detailProduct = ctype_digit($idParam)
+        ? getProduct($pdo, (int)$idParam)
+        : getProductByCode($pdo, $idParam);
     if (!$detailProduct) {
         $errorMessage = 'Product not found.';
         $view = 'list';

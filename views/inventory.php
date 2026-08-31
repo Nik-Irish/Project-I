@@ -4,6 +4,11 @@
  *
  * Requires: $detailProduct, $partMovements, $partSales, LOW_STOCK_THRESHOLD
  */
+
+// nothing to render if no product was loaded
+if (empty($detailProduct)) {
+    return;
+}
 ?>
 
 <!-- Product summary cards -->
@@ -63,7 +68,6 @@
                     <th>Type</th>
                     <th>Amount</th>
                     <th>Balance After</th>
-                    <th>Note</th>
                     <th>Date</th>
                 </tr>
             </thead>
@@ -77,7 +81,6 @@
                     </td>
                     <td><?php echo (int)$m['amount']; ?></td>
                     <td><?php echo (int)$m['balance_after']; ?></td>
-                    <td><?php echo htmlspecialchars($m['note'] ?? ''); ?></td>
                     <td><?php echo htmlspecialchars($m['created_at']); ?></td>
                 </tr>
             <?php endforeach; ?>

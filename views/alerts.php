@@ -55,7 +55,7 @@
 
                     <td>
                         <?php if (!empty($n['product_id'])): ?>
-                            <a href="dashboard.php?view=inventory&id=<?php echo (int)$n['product_id']; ?>">
+                            <a href="dashboard.php?view=inventory&id=<?php echo urlencode($n['product_id']); ?>">
                                 View
                             </a>
                         <?php else: ?>

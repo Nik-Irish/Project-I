@@ -17,6 +17,12 @@ function getProduct($pdo, $id) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function getProductByCode($pdo, $code) {
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE product_id=?");
+    $stmt->execute([$code]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 function getSale($pdo, $id) {
     $stmt = $pdo->prepare("SELECT * FROM sales WHERE id=?");
     $stmt->execute([$id]);

@@ -34,7 +34,6 @@ $pageTitles = [
 ];
 
 $pageSub = [
-    'list' => 'Overview of products and stock levels',
     'add' => 'Add a new product to the catalog',
     'edit' => 'Update product details',
     'sales' => 'View all recorded sales',

@@ -43,7 +43,11 @@ $view = $view ?? 'list';
     <main class="main">
         <header class="topbar">
             <div>
-                <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
+                <h1>
+                    <?php echo $view === 'list'
+                        ? 'Hey, ' . htmlspecialchars($_SESSION['username'] ?? 'Staff')
+                        : htmlspecialchars($pageTitle); ?>
+                </h1>
                 <p class="topbar-sub">
                     <?php echo htmlspecialchars($pageSub[$view] ?? ''); ?>
                 </p>
