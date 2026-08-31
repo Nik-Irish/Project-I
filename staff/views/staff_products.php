@@ -19,7 +19,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>SKU</th>
+                    <th>Product_ID</th>
                     <th>Category</th>
                     <th>Price</th>
                     <th>Stock</th>
@@ -29,7 +29,7 @@
             <?php foreach ($products as $product): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($product['name']); ?></td>
-                    <td><?php echo htmlspecialchars($product['sku']); ?></td>
+                    <td><?php echo htmlspecialchars($product['product_id']); ?></td>
                     <td><?php echo htmlspecialchars($product['category']); ?></td>
                     <td>Rs.<?php echo number_format((float)$product['price'], 2); ?></td>
                     <td><?php echo (int)$product['quantity']; ?></td>

@@ -20,7 +20,7 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Customer Name</label>
+                    <label>Customer Name <span class="req">*</span></label>
                     <input type="text" name="customer_name"
                            value="<?php echo htmlspecialchars($_POST['customer_name'] ?? ''); ?>"
                     >
@@ -42,7 +42,7 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
                                     data-stock="<?php echo (int)$p['quantity']; ?>">
                                 <?php echo htmlspecialchars(
                                     $p['name']
-                                    . ' (Product-ID: ' . $p['sku'] . ')'
+                                    . ' (Product-ID: ' . $p['product_id'] . ')'
                                     . ' — Stock: ' . $p['quantity']
                                 ); ?>
                             </option>
@@ -58,7 +58,7 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
                 </div>
 
                 <div class="form-group">
-                    <label>Unit Price (Rs.) <span class="req">*</span></label>
+                    <label>Unit Price (Rs.)</label>
                     <input type="number" id="unit_price" name="unit_price"
                            step="0.01" min="0" required readonly
                            value="<?php echo htmlspecialchars($_POST['unit_price'] ?? ''); ?>">

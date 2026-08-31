@@ -19,8 +19,8 @@
 
             <div class="form-group">
                 <label>Product-ID <span class="req">*</span></label>
-                <input type="text" name="sku" required
-                       value="<?php echo htmlspecialchars($_POST['sku'] ?? ''); ?>">
+                <input type="text" name="product_id" required
+                       value="<?php echo htmlspecialchars($_POST['product_id'] ?? ''); ?>">
             </div>
 
             <div class="form-group">
@@ -38,7 +38,7 @@
             <div class="form-group">
                 <label>Initial Quantity <span class="req">*</span></label>
                 <input type="number" name="quantity" min="0" step="1" required
-                       value="<?php echo htmlspecialchars($_POST['quantity'] ?? '0'); ?>">
+                       value="<?php echo htmlspecialchars($_POST['quantity'] ?? ''); ?>">
             </div>
 
             <div class="form-group full">

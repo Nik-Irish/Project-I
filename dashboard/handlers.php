@@ -10,7 +10,6 @@
  * @var PDO         $pdo           Database connection (config/db.php)
  * @var string      $view          Active view slug (dashboard/bootstrap.php)
  * @var array|null  $detailProduct Product shown on the inventory detail page
- * @var array|null  $billSale      Sale shown on the bill page
  * @var array|null  $editStaff     Staff account being edited
  */
 
@@ -35,16 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$detailProduct) {
             $view = 'list';
             $errorMessage = $errorMessage ?: 'Product not found.';
-        }
-    }
-
-    if ($view === 'bill' && $billSale) {
-        $fresh = getSale($pdo, (int)$billSale['id']);
-        if ($fresh) {
-            $fresh['_subtotal'] = $billSale['_subtotal'] ?? 0;
-            $fresh['_tax'] = $billSale['_tax'] ?? 0;
-            $fresh['_total'] = $billSale['_total'] ?? 0;
-            $billSale = $fresh;
         }
     }
 

@@ -30,7 +30,7 @@ $bannerNotes = $pdo->query("SELECT * FROM notifications WHERE is_read=0 ORDER BY
 $pageTitles = [
     'list' => 'Dashboard', 'add' => 'Add Product', 'edit' => 'Modify Product',
     'sales' => 'Sales Report', 'sale_add' => 'Record Sale', 'inventory' => 'Inventory Details',
-    'report' => 'Sales Summary', 'notifications' => 'Alerts', 'bill' => 'Bill', 'staff' => 'Manage Staff',
+    'report' => 'Sales Summary', 'notifications' => 'Alerts', 'staff' => 'Manage Staff',
 ];
 
 $pageSub = [
@@ -42,7 +42,6 @@ $pageSub = [
     'inventory' => 'Stock and sales history for this product',
     'report' => 'Aggregated sales figures',
     'notifications' => 'System alerts and stock warnings',
-    'bill' => 'Invoice details',
     'staff' => 'Edit or remove staff accounts',
 ];
 

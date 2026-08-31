@@ -12,7 +12,7 @@
  *
  * Variables this file sets for the rest of the request:
  *     $view, $errorMessage, $successMessage, $editProduct,
- *     $detailProduct, $billSale, $editStaff,
+ *     $detailProduct, $editStaff,
  *     $products, $sales, $notifications, $staffUsers
  */
 
@@ -21,7 +21,13 @@ if (!defined('DASHBOARD_CONTROLLER')) {
     exit('Direct access not allowed.');
 }
 
-$allowedViews = ['list', 'add', 'edit', 'sales', 'sale_add', 'inventory', 'report', 'notifications', 'bill', 'staff'];
+if ($pdo->query("SHOW COLUMNS FROM products LIKE 'sku'")->fetch()) {
+    $pdo->exec("ALTER TABLE products CHANGE COLUMN sku product_id VARCHAR(50) NOT NULL COMMENT 'Product ID'");
+    $pdo->exec("ALTER TABLE products DROP INDEX uq_products_sku");
+    $pdo->exec("CREATE UNIQUE INDEX uq_products_product_id ON products(product_id)");
+}
+
+$allowedViews = ['list', 'add', 'edit', 'sales', 'sale_add', 'inventory', 'report', 'notifications', 'staff'];
 $view = $_GET['view'] ?? 'list';
 if (!in_array($view, $allowedViews, true)) {
     $view = 'list';
@@ -31,7 +37,6 @@ $errorMessage = '';
 $successMessage = '';
 $editProduct = null;
 $detailProduct = null;
-$billSale = null;
 $editStaff = null;
 
 [$products, $sales, $notifications, $staffUsers] = loadLists($pdo);
@@ -45,14 +50,6 @@ if (($_GET['download'] ?? '') === 'pdf' && isset($_GET['sale_id'])) {
         exit;
     }
     downloadInvoicePdf($dl);
-}
-
-if ($view === 'bill' && isset($_GET['id'])) {
-    $billSale = getSale($pdo, (int)$_GET['id']);
-    if (!$billSale) {
-        $errorMessage = 'Bill not found.';
-        $view = 'sales';
-    }
 }
 
 if ($view === 'edit' && isset($_GET['id'])) {

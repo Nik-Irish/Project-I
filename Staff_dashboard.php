@@ -16,15 +16,20 @@ require_once __DIR__ . '/includes/functions.php';
 define('DASHBOARD_CONTROLLER', true);
 require_once __DIR__ . '/dashboard/helpers.php';
 
+if ($pdo->query("SHOW COLUMNS FROM products LIKE 'sku'")->fetch()) {
+    $pdo->exec("ALTER TABLE products CHANGE COLUMN sku product_id VARCHAR(50) NOT NULL COMMENT 'Product ID'");
+    $pdo->exec("ALTER TABLE products DROP INDEX uq_products_sku");
+    $pdo->exec("CREATE UNIQUE INDEX uq_products_product_id ON products(product_id)");
+}
+
 $view = $_GET['view'] ?? 'list';
-$allowedViews = ['list', 'sale_add', 'sales', 'bill'];
+$allowedViews = ['list', 'sale_add', 'sales'];
 if (!in_array($view, $allowedViews, true)) {
     $view = 'list';
 }
 
 $errorMessage = '';
 $successMessage = '';
-$billSale = null;
 
 $products = $pdo->query('SELECT * FROM products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
 $salesStmt = $pdo->prepare('SELECT * FROM sales WHERE staff_id = ? ORDER BY sale_date DESC, created_at DESC');
@@ -80,25 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sale'
             $_SESSION['username']
         );
 
-        $billSale = getSale($pdo, (int)$sale['id']);
-        $billSale['_subtotal'] = $sale['subtotal'];
-        $billSale['_tax'] = $sale['tax'];
-        $billSale['_total'] = $sale['total'];
-
-        $successMessage = 'Sale recorded. Bill ' . $sale['bill_no'] . ' generated.';
-        $view = 'bill';
+        $successMessage = 'Sale recorded. Bill No: ' . $sale['bill_no'] . '.';
+        $view = 'sales';
         $salesStmt->execute([$_SESSION['user_id']]);
         $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-// view a recorded bill — staff may only open their own bills
-if ($view === 'bill' && isset($_GET['id'])) {
-    $billSale = getSale($pdo, (int)$_GET['id']);
-    if (!$billSale || (int)$billSale['staff_id'] !== (int)$_SESSION['user_id']) {
-        $billSale = null;
-        $errorMessage = 'Bill not found.';
-        $view = 'sales';
     }
 }
 
@@ -106,13 +96,11 @@ $pageTitles = [
     'list' => 'Dashboard',
     'sale_add' => 'Record Sale',
     'sales' => 'My Sales',
-    'bill' => 'Invoice',
 ];
 $pageSub = [
     'list' => 'Overview of available items',
     'sale_add' => 'Record a sale quickly',
     'sales' => 'Your recent sales',
-    'bill' => 'Print or download the bill',
 ];
 $dashboardScript = 'Staff_dashboard.php';
 $pageTitle = $pageTitles[$view] ?? 'Dashboard';
@@ -133,7 +121,6 @@ $viewMap = [
     'list' => 'staff/views/staff_products.php',
     'sale_add' => 'views/record_sale.php',
     'sales' => 'staff/views/staff_sales.php',
-    'bill' => 'views/bill.php',
 ];
 if (isset($viewMap[$view])) {
     require_once __DIR__ . '/' . $viewMap[$view];

@@ -20,7 +20,7 @@ function shortText(string $text, int $max = 48): string {
 // ── Log a stock movement ──────────────────────────────────────────────────────
 function logMovement(
     PDO $pdo,
-    int $pid,
+    string $productCode,
     string $type,
     int $amt,
     int $bal,
@@ -29,7 +29,7 @@ function logMovement(
     $pdo->prepare(
         'INSERT INTO movements (product_id, type, amount, balance_after, note)
          VALUES (?, ?, ?, ?, ?)'
-    )->execute([$pid, $type, $amt, $bal, $note]);
+    )->execute([$productCode, $type, $amt, $bal, $note]);
 }
 
 function recordSale(
@@ -54,12 +54,12 @@ function recordSale(
         ->execute([$newQuantity, (int)$product['id']]);
 
     $pdo->prepare(
-        "INSERT INTO sales (bill_no, product_id, product_name, sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_id, staff_name)
+        "INSERT INTO sales (bill_no, product_id, product_name, product_sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_id, staff_name)
          VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     )->execute([
-        (int)$product['id'],
+        $product['product_id'],
         $product['name'],
-        $product['sku'],
+        $product['product_id'],
         $product['category'] ?? 'General',
         $quantity,
         $unitPrice,
@@ -76,7 +76,7 @@ function recordSale(
     $billNo = makeBillNo($saleId);
     $pdo->prepare('UPDATE sales SET bill_no=? WHERE id=?')->execute([$billNo, $saleId]);
 
-    logMovement($pdo, (int)$product['id'], 'sale', $quantity, $newQuantity, 'Sale ' . $billNo);
+    logMovement($pdo, $product['product_id'], 'sale', $quantity, $newQuantity, 'Sale ' . $billNo);
     checkStockNotification($pdo, array_merge($product, ['quantity' => $newQuantity]), $oldQuantity, $newQuantity);
 
     return [
@@ -94,12 +94,12 @@ function addNotification(
     string $type,
     string $title,
     string $msg,
-    ?int $pid = null
+    ?string $productCode = null
 ): void {
     $pdo->prepare(
         'INSERT INTO notifications (type, title, message, product_id, is_read)
          VALUES (?, ?, ?, ?, 0)'
-    )->execute([$type, $title, $msg, $pid]);
+    )->execute([$type, $title, $msg, $productCode]);
 }
 
 // ── Fire stock alerts when quantity changes ───────────────────────────────────
@@ -110,16 +110,16 @@ function checkStockNotification(
     int $new
 ): void {
     $name = $product['name'] ?? 'Product';
-    $sku  = $product['sku']  ?? '';
-    $id   = (int)($product['id'] ?? 0);
+    $productId  = $product['product_id']  ?? '';
+    $productCode = $productId !== '' ? $productId : null;
 
     if ($new === 0 && $old > 0) {
         addNotification(
             $pdo,
             'out_of_stock',
             'Out of stock',
-            '"' . $name . '" (Product-ID: ' . $sku . ') is out of stock. Please restock.',
-            $id
+            '"' . $name . '" (Product-ID: ' . $productId . ') is out of stock. Please restock.',
+            $productCode
         );
         return;
     }
@@ -129,8 +129,8 @@ function checkStockNotification(
             $pdo,
             'low_stock',
             'Low stock alert',
-            '"' . $name . '" (Product-ID: ' . $sku . ') has only ' . $new . ' unit(s) left.',
-            $id
+            '"' . $name . '" (Product-ID: ' . $productId . ') has only ' . $new . ' unit(s) left.',
+            $productCode
         );
     }
 }

@@ -1,8 +1,4 @@
 <?php
-/**
- * pdf_invoice.php — Simple PDF bill generator for IMS Nepal
- */
-
 if (!function_exists('makeBillNo')) {
     function makeBillNo(int $id): string {
         return 'BILL-' . str_pad((string)$id, 5, '0', STR_PAD_LEFT);
@@ -19,13 +15,13 @@ function downloadInvoicePdf(array $sale): void {
     $custName    = htmlspecialchars($sale['customer_name']  ?? 'Walk-in Customer');
     $custPhone   = htmlspecialchars($sale['customer_phone'] ?? '');
     $productName = htmlspecialchars($sale['product_name']   ?? '');
-    $sku         = htmlspecialchars($sale['sku']            ?? '');
+    $productSku = htmlspecialchars($sale['product_sku']            ?? '');
     $qty         = (int)($sale['quantity']  ?? 0);
     $unitPrice   = number_format((float)($sale['unit_price'] ?? 0), 2);
     $note        = htmlspecialchars($sale['note'] ?? '');
 
     header('Content-Type: text/html; charset=utf-8');
-    ?>
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,7 +31,7 @@ function downloadInvoicePdf(array $sale): void {
         body { font-family: monospace; max-width: 400px; margin: 2rem auto; padding: 1rem; color: #000; }
         h2 { text-align: center; margin: 0; }
         .center { text-align: center; }
-        .line { border-top: 1px dashed #000; margin: .5rem 0; }
+        hr { border: none; border-top: 1px dashed #000; margin: .5rem 0; }
         table { width: 100%; border-collapse: collapse; font-size: .85rem; }
         td, th { padding: .25rem 0; }
         .right { text-align: right; }
@@ -49,9 +45,8 @@ function downloadInvoicePdf(array $sale): void {
 <body>
 
 <h2>IMS Nepal</h2>
-<p class="center small">Ph: +977 9705217752 | sales@nirmanirm.com</p>
-
-<div class="line"></div>
+<p class="center small">Ph: +977 9842020363 | sales@IMS.com</p>
+<hr>
 
 <p>
     Bill: <?php echo $billNo; ?><br>
@@ -59,8 +54,7 @@ function downloadInvoicePdf(array $sale): void {
     Customer: <?php echo $custName; ?>
     <?php if ($custPhone): ?>(<?php echo $custPhone; ?>)<?php endif; ?>
 </p>
-
-<div class="line"></div>
+<hr>
 
 <table>
     <tr class="bold">
@@ -70,14 +64,14 @@ function downloadInvoicePdf(array $sale): void {
         <th class="right">Amt</th>
     </tr>
     <tr>
-        <td><?php echo $productName; ?><br><span class="small"><?php echo $sku; ?></span></td>
+        <td><?php echo $productName; ?><br><span class="small"><?php echo $productSku; ?></span></td>
         <td class="right"><?php echo $qty; ?></td>
-        <td class="right"><?php echo $unitPrice; ?></td>
-        <td class="right"><?php echo number_format($subtotal, 2); ?></td>
+        <td class="right">Rs.<?php echo $unitPrice; ?></td>
+        <td class="right">Rs.<?php echo number_format($subtotal, 2); ?></td>
     </tr>
 </table>
 
-<div class="line"></div>
+<hr>
 
 <table>
     <tr><td>Subtotal</td><td class="right">Rs. <?php echo number_format($subtotal, 2); ?></td></tr>
@@ -85,10 +79,9 @@ function downloadInvoicePdf(array $sale): void {
     <tr class="bold"><td>TOTAL</td><td class="right">Rs. <?php echo number_format($total, 2); ?></td></tr>
 </table>
 
-<div class="line"></div>
+<hr>
 
 <?php if ($note): ?><p class="small">Note: <?php echo $note; ?></p><?php endif; ?>
-
 <p class="center small">Thank you for your business!</p>
 
 <div class="actions">
@@ -99,6 +92,6 @@ function downloadInvoicePdf(array $sale): void {
 <script>window.onload = () => window.print();</script>
 </body>
 </html>
-    <?php
+<?php
     exit;
 }

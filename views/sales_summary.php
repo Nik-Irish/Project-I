@@ -84,7 +84,7 @@ $reportCategory = $reportCategory ?? '';
             <?php foreach ($salesByProduct as $sp): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($sp['name']); ?></td>
-                    <td><?php echo htmlspecialchars($sp['sku']); ?></td>
+                    <td><?php echo htmlspecialchars($sp['product_sku']); ?></td>
                     <td><?php echo $sp['qty']; ?></td>
                     <td>Rs.<?php echo number_format($sp['total'], 2); ?></td>
                 </tr>
@@ -114,7 +114,7 @@ $reportCategory = $reportCategory ?? '';
                     <tr>
                         <td><?php echo htmlspecialchars($recorder); ?></td>
                         <td><?php echo htmlspecialchars($recorderSale['name']); ?></td>
-                        <td><?php echo htmlspecialchars($recorderSale['sku']); ?></td>
+                        <td><?php echo htmlspecialchars($recorderSale['product_sku']); ?></td>
                         <td><?php echo $recorderSale['qty']; ?></td>
                         <td>Rs.<?php echo number_format($recorderSale['total'], 2); ?></td>
                     </tr>

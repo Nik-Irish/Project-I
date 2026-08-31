@@ -11,7 +11,6 @@
  * @var string $view           Active view slug (dashboard/bootstrap.php)
  * @var string $errorMessage   Feedback rendered by views/messages.php
  * @var string $successMessage Feedback rendered by views/messages.php
- * @var array|null $billSale   Sale shown on the bill page after recording
  */
 
 if (!defined('DASHBOARD_CONTROLLER')) {
@@ -56,13 +55,8 @@ if ($action === 'sale') {
             $_SESSION['username'] ?? 'admin'
         );
 
-        $billSale = getSale($pdo, $sale['id']);
-        $billSale['_subtotal'] = $sale['subtotal'];
-        $billSale['_tax'] = $sale['tax'];
-        $billSale['_total'] = $sale['total'];
-
-        $successMessage = 'Sale recorded. Bill ' . $sale['bill_no'] . ' generated.';
-        $view = 'bill';
+        $successMessage = 'Sale recorded. Bill No: ' . $sale['bill_no'] . '.';
+        $view = 'sales';
     }
 }
 
@@ -74,13 +68,20 @@ if ($action === 'delete_sale') {
         $errorMessage = 'Sale not found.';
         $view = 'sales';
     } else {
-        $prod = getProduct($pdo, (int)$sale['product_id']);
+        $code = (string)($sale['product_id'] ?? '');
+        $prod = null;
+        if ($code !== '') {
+            $stmt = $pdo->prepare("SELECT * FROM products WHERE product_id=?");
+            $stmt->execute([$code]);
+            $prod = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
         if ($prod) {
-            $pdo->prepare("UPDATE products SET quantity=quantity+? WHERE id=?")
-                ->execute([(int)$sale['quantity'], (int)$sale['product_id']]);
+            $pdo->prepare("UPDATE products SET quantity=quantity+? WHERE product_id=?")
+                ->execute([(int)$sale['quantity'], $code]);
 
             $restoredQty = (int)$prod['quantity'] + (int)$sale['quantity'];
-            logMovement($pdo, (int)$sale['product_id'], 'in', (int)$sale['quantity'], $restoredQty, 'Sale cancelled / stock restored');
+            logMovement($pdo, $code, 'in', (int)$sale['quantity'], $restoredQty, 'Sale cancelled / stock restored');
         }
 
         $pdo->prepare("DELETE FROM sales WHERE id=?")->execute([$sid]);

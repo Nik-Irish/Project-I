@@ -39,7 +39,7 @@ try {
         CREATE TABLE IF NOT EXISTS products (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
             name VARCHAR(150) NOT NULL,
-            sku VARCHAR(50) NOT NULL COMMENT 'Product ID',
+            product_id VARCHAR(50) NOT NULL COMMENT 'Product ID',
             category VARCHAR(80) NOT NULL DEFAULT 'General',
             price DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT 'Rs.',
             quantity INT NOT NULL DEFAULT 0,
@@ -47,7 +47,7 @@ try {
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            UNIQUE KEY uq_products_sku (sku)
+            UNIQUE KEY uq_products_product_id (product_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
     $messages[] = 'Table products ready.';
@@ -55,15 +55,14 @@ try {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS movements (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-            product_id INT UNSIGNED NOT NULL,
+            product_id VARCHAR(50) NOT NULL COMMENT 'Product ID code (products.product_id)',
             type ENUM('in','out','sale','adjust') NOT NULL,
             amount INT UNSIGNED NOT NULL,
             balance_after INT NOT NULL,
             note VARCHAR(255) NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            KEY idx_movements_product (product_id),
-            CONSTRAINT fk_movements_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE
+            KEY idx_movements_product (product_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
     $messages[] = 'Table movements ready.';
@@ -72,9 +71,9 @@ try {
         CREATE TABLE IF NOT EXISTS sales (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
             bill_no VARCHAR(30) NOT NULL,
-            product_id INT UNSIGNED NULL,
+            product_id VARCHAR(50) NULL COMMENT 'Product ID code (products.product_id)',
             product_name VARCHAR(150) NOT NULL,
-            sku VARCHAR(50) NOT NULL COMMENT 'Product ID',
+            product_sku VARCHAR(50) NOT NULL COMMENT 'Product ID',
             category VARCHAR(80) NOT NULL DEFAULT 'General',
             quantity INT UNSIGNED NOT NULL,
             unit_price DECIMAL(12,2) NOT NULL COMMENT 'Rs.',
@@ -88,8 +87,7 @@ try {
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             UNIQUE KEY uq_sales_bill_no (bill_no),
-            KEY idx_sales_product (product_id),
-            CONSTRAINT fk_sales_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL ON UPDATE CASCADE
+            KEY idx_sales_product (product_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
     $messages[] = 'Table sales ready.';
@@ -100,11 +98,11 @@ try {
             type VARCHAR(40) NOT NULL DEFAULT 'info',
             title VARCHAR(150) NOT NULL,
             message TEXT NOT NULL,
-            product_id INT UNSIGNED NULL,
+            product_id VARCHAR(50) NULL COMMENT 'Product ID code (products.product_id)',
             is_read TINYINT(1) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            CONSTRAINT fk_notifications_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL ON UPDATE CASCADE
+            KEY idx_notifications_product (product_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
     $messages[] = 'Table notifications ready.';
@@ -138,6 +136,55 @@ try {
         $pdo->exec("ALTER TABLE sales ADD COLUMN staff_id INT UNSIGNED NULL AFTER sale_date, ADD COLUMN staff_name VARCHAR(100) NULL AFTER staff_id");
         $messages[] = 'Added staff_id and staff_name to sales.';
     }
+
+    if ($pdo->query("SHOW COLUMNS FROM products LIKE 'sku'")->fetch()) {
+        $pdo->exec("ALTER TABLE products DROP COLUMN sku");
+        $messages[] = 'Removed sku column from products.';
+    }
+    // add product_id column needed by older installs, if missing
+    if (!$pdo->query("SHOW COLUMNS FROM products LIKE 'product_id'")->fetch()) {
+        $pdo->exec("ALTER TABLE products ADD COLUMN product_id VARCHAR(50) NOT NULL AFTER name");
+        // give existing rows a unique placeholder Product-ID so the UNIQUE key can be added
+        $pdo->exec("UPDATE products SET product_id = CONCAT('P', id) WHERE product_id = ''");
+        $messages[] = 'Added product_id column to products.';
+    }
+
+    if (!$pdo->query("SHOW INDEX FROM products WHERE Key_name = 'uq_products_product_id'")->fetch()) {
+        $pdo->exec("ALTER TABLE products ADD UNIQUE KEY uq_products_product_id (product_id)");
+        $messages[] = 'Added unique key on products.product_id.';
+    }
+
+    // add product_sku column to sales needed by older installs, if missing
+    if (!$pdo->query("SHOW COLUMNS FROM sales LIKE 'product_sku'")->fetch()) {
+        $pdo->exec("ALTER TABLE sales ADD COLUMN product_sku VARCHAR(50) NOT NULL COMMENT 'Product ID' AFTER product_name");
+        // backfill existing rows from the product's current Product-ID where possible
+        $pdo->exec("UPDATE sales s LEFT JOIN products p ON s.product_id = p.id SET s.product_sku = COALESCE(p.product_id, '') WHERE s.product_sku = ''");
+        $messages[] = 'Added product_sku column to sales.';
+    }
+
+    // convert numeric product references to the Product-ID code on older installs
+    foreach (['movements', 'sales', 'notifications'] as $tbl) {
+        $colType = $pdo->query(
+            "SELECT DATA_TYPE FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$tbl' AND COLUMN_NAME = 'product_id'"
+        )->fetchColumn();
+        if (!$colType || $colType === 'varchar' || $colType === 'char') continue;
+
+        $fkName = $pdo->query(
+            "SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$tbl'
+               AND COLUMN_NAME = 'product_id' AND REFERENCED_TABLE_NAME = 'products'"
+        )->fetchColumn();
+        if ($fkName) {
+            $pdo->exec("ALTER TABLE `$tbl` DROP FOREIGN KEY `$fkName`");
+        }
+        $pdo->exec("UPDATE `$tbl` t JOIN products p ON t.product_id = p.id SET t.product_id = p.product_id");
+        $nullability = ($tbl === 'movements') ? 'NOT NULL' : 'NULL';
+        $pdo->exec("ALTER TABLE `$tbl` MODIFY product_id VARCHAR(50) $nullability");
+        $messages[] = "Converted $tbl.product_id to store Product-ID codes.";
+    }
+
+    // create or reset the default admin account
 
     // create or reset the default admin account
     $adminHash = password_hash('Password123!', PASSWORD_DEFAULT);

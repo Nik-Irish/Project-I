@@ -26,8 +26,8 @@ if (!is_array($editProduct)) {
 
             <div class="form-group">
                 <label>Product-ID <span class="req">*</span></label>
-                <input type="text" name="sku" required readonly
-                       value="<?php echo htmlspecialchars((string)($editProduct['sku'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="text" name="product_id" required readonly
+                       value="<?php echo htmlspecialchars((string)($editProduct['product_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
             </div>
 
             <div class="form-group">

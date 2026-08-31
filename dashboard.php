@@ -45,7 +45,7 @@ require_once __DIR__ . '/views/messages.php';       // error/success + alert ban
 $viewMap = [
     'list' => 'views/products.php', 'add' => 'views/add_product.php', 'edit' => 'views/edit_product.php',
     'sale_add' => 'views/record_sale.php', 'sales' => 'views/sales_report.php', 'report' => 'views/sales_summary.php',
-    'notifications' => 'views/alerts.php', 'staff' => 'staff/views/staff.php', 'bill' => 'views/bill.php', 'inventory' => 'views/inventory.php',
+    'notifications' => 'views/alerts.php', 'staff' => 'staff/views/staff.php', 'inventory' => 'views/inventory.php',
 ];
 
 if (isset($viewMap[$view])) {

@@ -27,7 +27,7 @@ if (!defined('DASHBOARD_CONTROLLER')) {
 // search filter for product list
 $search = trim($_GET['q'] ?? '');
 if ($search !== '' && $view === 'list') {
-    $stmt = $pdo->prepare("SELECT * FROM products WHERE CONCAT(name, ' ', sku, ' ', category, ' ', COALESCE(description,'')) LIKE ? ORDER BY id");
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE CONCAT(name, ' ', product_id, ' ', category, ' ', COALESCE(description,'')) LIKE ? ORDER BY id");
     $stmt->execute(['%' . $search . '%']);
     $filtered = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
@@ -37,7 +37,7 @@ if ($search !== '' && $view === 'list') {
 // sales filters
 $reportFrom = trim($_GET['from'] ?? '');
 $reportTo = trim($_GET['to'] ?? '');
-$reportProductId = isset($_GET['product_id']) ? (int)$_GET['product_id'] : 0;
+$reportProductId = trim($_GET['product_id'] ?? '');
 $reportCategory = trim($_GET['category'] ?? '');
 
 if ($view === 'sales' || $view === 'report') {
@@ -45,7 +45,7 @@ if ($view === 'sales' || $view === 'report') {
     $params = [];
     if ($reportFrom !== '') { $sql .= " AND sale_date>=?"; $params[] = $reportFrom; }
     if ($reportTo !== '') { $sql .= " AND sale_date<=?"; $params[] = $reportTo; }
-    if ($reportProductId > 0) { $sql .= " AND product_id=?"; $params[] = $reportProductId; }
+    if ($reportProductId !== '') { $sql .= " AND product_id=?"; $params[] = $reportProductId; }
     if ($reportCategory !== '') { $sql .= " AND category=?"; $params[] = $reportCategory; }
     $sql .= " ORDER BY sale_date DESC, created_at DESC";
 
@@ -69,7 +69,7 @@ foreach ($filteredSales as $s) {
 
     $pid = (int)$s['product_id'];
     if (!isset($salesByProduct[$pid])) {
-        $salesByProduct[$pid] = ['name' => $s['product_name'], 'sku' => $s['sku'], 'qty' => 0, 'total' => 0.0];
+        $salesByProduct[$pid] = ['name' => $s['product_name'], 'product_sku' => $s['product_sku'], 'qty' => 0, 'total' => 0.0];
     }
     $salesByProduct[$pid]['qty'] += (int)$s['quantity'];
     $salesByProduct[$pid]['total'] += (float)$s['total'];
@@ -78,7 +78,7 @@ foreach ($filteredSales as $s) {
     if (!isset($salesByRecorderProduct[$recorder][$pid])) {
         $salesByRecorderProduct[$recorder][$pid] = [
             'name' => $s['product_name'],
-            'sku' => $s['sku'],
+            'product_sku' => $s['product_sku'],
             'qty' => 0,
             'total' => 0.0,
         ];
@@ -103,13 +103,13 @@ $partMovements = [];
 $partSales = [];
 
 if ($view === 'inventory' && $detailProduct) {
-    $pid = (int)$detailProduct['id'];
+    $pcode = (string)($detailProduct['product_id'] ?? '');
 
     $stmt = $pdo->prepare("SELECT * FROM movements WHERE product_id=? ORDER BY created_at DESC");
-    $stmt->execute([$pid]);
+    $stmt->execute([$pcode]);
     $partMovements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $stmt = $pdo->prepare("SELECT * FROM sales WHERE product_id=? ORDER BY sale_date DESC, created_at DESC");
-    $stmt->execute([$pid]);
+    $stmt->execute([$pcode]);
     $partSales = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }

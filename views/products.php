@@ -5,6 +5,11 @@
  * Requires: $filtered, $search, $totalProducts, $totalStock,
  *           $totalValue, $lowStockCount, LOW_STOCK_THRESHOLD
  */
+
+// defensive defaults — $search/$filtered are normally set by dashboard/filters.php
+$search = $search ?? '';
+$filtered = $filtered ?? [];
+
 ?>
 
 <!-- Stats row -->
@@ -85,6 +90,7 @@
                     <th>Category</th>
                     <th>Price</th>
                     <th>Stock</th>
+                    <th>Total</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -105,14 +111,13 @@
                         <?php endif; ?>
                     </td>
 
-                    <td><code><?php echo htmlspecialchars($p['sku']); ?></code></td>
+                    <td><code><?php echo htmlspecialchars($p['product_id']); ?></code></td>
 
                     <td>
                         <span class="badge"><?php echo htmlspecialchars($p['category']); ?></span>
                     </td>
 
                     <td>Rs.<?php echo number_format((float)$p['price'], 2); ?></td>
-
                     <td>
                         <span class="stock
                             <?php echo (int)$p['quantity'] === 0
@@ -122,6 +127,9 @@
                             <?php echo (int)$p['quantity']; ?>
                         </span>
                     </td>
+
+                    <td>Rs.<?php echo number_format((float)$p['price'] * (int)$p['quantity'], 2); ?></td>
+
 
                     <!-- Row actions -->
                     <td class="row-actions">

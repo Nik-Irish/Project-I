@@ -23,13 +23,13 @@ if (!defined('DASHBOARD_CONTROLLER')) {
 
 if ($action === 'add') {
     $name = trim($_POST['name'] ?? '');
-    $sku = trim($_POST['sku'] ?? '');
+    $productId = trim($_POST['product_id'] ?? '');
     $cat = trim($_POST['category'] ?? '');
     $price = trim($_POST['price'] ?? '');
     $qty = trim($_POST['quantity'] ?? '');
     $desc = trim($_POST['description'] ?? '');
 
-    if ($name === '' || $sku === '' || $price === '' || $qty === '') {
+    if ($name === '' || $productId === '' || $price === '' || $qty === '') {
         $errorMessage = 'Name, Product-ID, price, and quantity are required.';
         $view = 'add';
     } elseif (!is_numeric($price) || (float)$price < 0) {
@@ -39,8 +39,8 @@ if ($action === 'add') {
         $errorMessage = 'Quantity must be a whole number.';
         $view = 'add';
     } else {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE sku=?");
-        $stmt->execute([$sku]);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE product_id=?");
+        $stmt->execute([$productId]);
         if ((int)$stmt->fetchColumn() > 0) {
             $errorMessage = 'This Product-ID already exists.';
             $view = 'add';
@@ -48,12 +48,12 @@ if ($action === 'add') {
             $q = (int)$qty;
             $c = $cat !== '' ? $cat : 'General';
 
-            $pdo->prepare("INSERT INTO products (name, sku, category, price, quantity, description) VALUES (?, ?, ?, ?, ?, ?)")
-                ->execute([$name, $sku, $c, round((float)$price, 2), $q, $desc]);
+            $pdo->prepare("INSERT INTO products (name, product_id, category, price, quantity, description) VALUES (?, ?, ?, ?, ?, ?)")
+                ->execute([$name, $productId, $c, round((float)$price, 2), $q, $desc]);
 
             $newId = (int)$pdo->lastInsertId();
             if ($q > 0) {
-                logMovement($pdo, $newId, 'in', $q, $q, 'Initial stock');
+                logMovement($pdo, $productId, 'in', $q, $q, 'Initial stock');
             }
 
             $np = getProduct($pdo, $newId);
@@ -75,7 +75,7 @@ if ($action === 'add') {
 if ($action === 'update') {
     $id = (int)($_POST['id'] ?? 0);
     $name = trim($_POST['name'] ?? '');
-    $sku = trim($_POST['sku'] ?? '');
+    $productId = trim($_POST['product_id'] ?? '');
     $cat = trim($_POST['category'] ?? '');
     $price = trim($_POST['price'] ?? '');
     $qty = trim($_POST['quantity'] ?? '');
@@ -99,20 +99,20 @@ if ($action === 'update') {
         $oldQty = (int)$editProduct['quantity'];
         $newQty = (int)$qty;
 
-        /* Identity fields (name, sku, category) are locked in Modify Product:
+        /* Identity fields (name, product_id, category) are locked in Modify Product:
            ignore the posted values and always keep the stored ones. */
         $name = $editProduct['name'];
-        $sku  = $editProduct['sku'];
+        $productId  = $editProduct['product_id'];
         $cat  = $editProduct['category'];
         $c = $cat !== '' ? $cat : 'General';
 
-        $pdo->prepare("UPDATE products SET name=?, sku=?, category=?, price=?, quantity=?, description=? WHERE id=?")
-            ->execute([$name, $sku, $c, round((float)$price, 2), $newQty, $desc, $id]);
+        $pdo->prepare("UPDATE products SET name=?, product_id=?, category=?, price=?, quantity=?, description=? WHERE id=?")
+            ->execute([$name, $productId, $c, round((float)$price, 2), $newQty, $desc, $id]);
 
         if ($newQty !== $oldQty) {
             $diff = $newQty - $oldQty;
             $note = 'Manual adjust (' . ($diff > 0 ? '+' : '-') . abs($diff) . ')';
-            logMovement($pdo, $id, 'adjust', abs($diff), $newQty, $note);
+            logMovement($pdo, $editProduct['product_id'], 'adjust', abs($diff), $newQty, $note);
             checkStockNotification($pdo, getProduct($pdo, $id), $oldQty, $newQty);
         }
 
@@ -146,7 +146,7 @@ if ($action === 'stock_in' || $action === 'stock_out') {
         $op = $action === 'stock_in' ? '+' : '-';
 
         $pdo->prepare("UPDATE products SET quantity=quantity{$op}? WHERE id=?")->execute([$a, $id]);
-        logMovement($pdo, $id, $action === 'stock_in' ? 'in' : 'out', $a, $new, $action === 'stock_in' ? 'Stock input' : 'Stock output');
+        logMovement($pdo, $product['product_id'], $action === 'stock_in' ? 'in' : 'out', $a, $new, $action === 'stock_in' ? 'Stock input' : 'Stock output');
 
         $updated = getProduct($pdo, $id);
         if ($action === 'stock_out') {

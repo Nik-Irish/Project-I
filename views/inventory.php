@@ -11,7 +11,7 @@
     <div class="stat-card">
         <div class="stat-label"><?php echo htmlspecialchars($detailProduct['name']); ?></div>
         <div class="stat-value" style="font-size:1rem;">
-            Product-ID: <?php echo htmlspecialchars($detailProduct['sku']); ?>
+            Product-ID: <?php echo htmlspecialchars($detailProduct['product_id']); ?>
         </div>
     </div>
     <div class="stat-card">
