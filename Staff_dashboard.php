@@ -7,7 +7,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'staff') {
 }
 
 require_once __DIR__ . '/pdf_invoice.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/connector.php';
 require_once __DIR__ . '/includes/functions.php';
 
 // getSale() lives in the shared dashboard helpers. Define the same sentinel the
