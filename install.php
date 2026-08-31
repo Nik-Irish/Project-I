@@ -184,6 +184,30 @@ try {
         $messages[] = "Converted $tbl.product_id to store Product-ID codes.";
     }
 
+    // connect related tables with foreign keys (same-named columns stay in sync)
+    $fks = [
+        ['movements', 'fk_movements_product',
+            'ALTER TABLE movements ADD CONSTRAINT fk_movements_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE'],
+        ['sales', 'fk_sales_product',
+            'ALTER TABLE sales ADD CONSTRAINT fk_sales_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE'],
+        ['sales', 'fk_sales_sku',
+            'ALTER TABLE sales ADD CONSTRAINT fk_sales_sku FOREIGN KEY (product_sku) REFERENCES products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE'],
+        ['notifications', 'fk_notifications_product',
+            'ALTER TABLE notifications ADD CONSTRAINT fk_notifications_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE SET NULL ON UPDATE CASCADE'],
+        ['sales', 'fk_sales_staff',
+            'ALTER TABLE sales ADD CONSTRAINT fk_sales_staff FOREIGN KEY (staff_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE'],
+    ];
+    foreach ($fks as [$tbl, $fkName, $fkSql]) {
+        $exists = $pdo->query(
+            "SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$tbl' AND CONSTRAINT_NAME = '$fkName'"
+        )->fetchColumn();
+        if (!$exists) {
+            $pdo->exec($fkSql);
+            $messages[] = "Added foreign key $fkName.";
+        }
+    }
+
     // create or reset the default admin account
 
     // create or reset the default admin account

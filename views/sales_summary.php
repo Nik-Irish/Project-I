@@ -58,7 +58,7 @@ $reportCategory = $reportCategory ?? '';
         <div class="stat-value"><?php echo $salesUnits; ?></div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Total Revenue (incl. VAT)</div>
+        <div class="stat-label">Total (incl. VAT)</div>
         <div class="stat-value">Rs.<?php echo number_format($salesTotal, 2); ?></div>
     </div>
     <div class="stat-card">
@@ -77,7 +77,7 @@ $reportCategory = $reportCategory ?? '';
                     <th>Product</th>
                     <th>Product-ID</th>
                     <th>Units Sold</th>
-                    <th>Revenue</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -105,7 +105,7 @@ $reportCategory = $reportCategory ?? '';
                     <th>Product</th>
                     <th>Product-ID</th>
                     <th>Units Sold</th>
-                    <th>Revenue</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -134,7 +134,7 @@ $reportCategory = $reportCategory ?? '';
                 <tr>
                     <th>Date</th>
                     <th>Units Sold</th>
-                    <th>Revenue</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
