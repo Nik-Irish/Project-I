@@ -1,0 +1,140 @@
+/* IMS Nepal — Manage Staff view (dashboard.php?view=staff) — loaded by staff/views/staff.php */
+
+/* ── Password input wrapper (add form + inline edit) ─────────────────────── */
+.pw-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pw-input-wrap input {
+  flex: 1;
+  padding-right: 3.5rem;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--blue, #3f72af);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.pw-toggle:hover {
+  background: rgba(56, 189, 248, 0.22);
+  color: #f9f7f7;
+}
+
+.pw-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+/* ── Add Staff button full-width ─────────────────────────────────────────── */
+.btn-block {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+}
+
+/* ── Add Staff card ──────────────────────────────────────────────────────── */
+.add-staff-card {
+  background: #f5fffa;
+  border-color: #dbe2ef;
+}
+.add-staff-card h2,
+.add-staff-card .form-group label {
+  color: #112d4e;
+}
+.add-staff-card .form-group input {
+  color: #112d4e;
+  background: #eef6ff;
+  border-color: #9fb9d6;
+}
+.add-staff-card .form-group input:focus {
+  border-color: #3f72af;
+  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.2);
+}
+
+/* ── Inline edit row ─────────────────────────────────────────────────────── */
+.inline-edit-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.editing-row td {
+  background: rgba(63, 114, 175, 0.15);
+}
+
+.edit-input {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  color: var(--white, #f9f7f7);
+  background: #0d263f;
+  border: 1px solid rgba(219, 226, 239, 0.3);
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+}
+.edit-input:focus {
+  border-color: var(--blue, #3f72af);
+  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+}
+.edit-username {
+  width: 140px;
+}
+.edit-pw-wrap {
+  width: 240px;
+}
+.edit-pw-wrap input {
+  width: 100%;
+}
+
+/* ── Per-row password form ───────────────────────────────────────────────── */
+.staff-password-form {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.staff-password-wrap {
+  width: 190px;
+}
+.staff-password-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.82rem;
+  color: var(--white, #f9f7f7);
+  background: #0d263f;
+  border: 1px solid rgba(219, 226, 239, 0.3);
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+}
+.staff-password-input:focus {
+  border-color: var(--blue, #3f72af);
+  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+}
+.staff-password-input::placeholder {
+  color: var(--mist, #dbe2ef);
+}
+
+@media (max-width: 760px) {
+  .staff-password-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .staff-password-wrap {
+    width: 100%;
+  }
+}

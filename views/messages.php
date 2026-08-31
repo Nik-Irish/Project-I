@@ -26,20 +26,8 @@ if (!defined('DASHBOARD_CONTROLLER')) {
     <div class="msg msg-success"><?php echo htmlspecialchars($successMessage); ?></div>
 <?php endif; ?>
 
-<!-- View-specific styles (small rules moved from dashboard-style.css) -->
-<style>
-.notif-banner-title a {
-  color: #38bdf8;
-  font-size: 0.8rem;
-  text-decoration: none;
-}
-
-.notif-banner-list li a {
-  color: #38bdf8;
-  margin-left: 0.3rem;
-  font-size: 0.75rem;
-}
-</style>
+<!-- View-specific styles (alert banner) -->
+<link rel="stylesheet" href="css/banner.css">
 
 <?php if (!empty($bannerNotes) && $view !== 'notifications'): ?>
     <div class="notif-banner">

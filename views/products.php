@@ -33,28 +33,8 @@ $filtered = $filtered ?? [];
 </div>
 
 <!-- Toolbar -->
-<!-- View-specific styles (small rules moved from dashboard-style.css) -->
-<style>
-.btn-info {
-  color: #a5b4fc;
-  background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.35);
-}
-.btn-info:hover {
-  background: rgba(99, 102, 241, 0.35);
-}
-
-.cell-desc {
-  font-size: 0.7rem;
-  color: #64748b;
-  margin-top: 0.15rem;
-}
-
-.link-name {
-  color: #e2e8f0;
-  text-decoration: none;
-}
-</style>
+<!-- View-specific styles (products list) -->
+<link rel="stylesheet" href="css/products.css">
 
 <div class="toolbar">
     <form class="search-form" method="GET" action="dashboard.php">

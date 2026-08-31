@@ -130,75 +130,8 @@
     <?php endif; ?>
 </div>
 
-<!-- View-specific styles (small rules moved from dashboard-style.css) -->
-<style>
-.add-staff-card {
-  background: #f5fffa;
-  border-color: #dbe2ef;
-}
-.add-staff-card h2,
-.add-staff-card .form-group label {
-  color: #112d4e;
-}
-.add-staff-card .form-group input {
-  color: #112d4e;
-  background: #eef6ff;
-  border-color: #9fb9d6;
-}
-.add-staff-card .form-group input:focus {
-  border-color: #3f72af;
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.2);
-}
-
-/* Password wrapper (add form + inline edit) */
-.pw-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.pw-input-wrap input {
-  flex: 1;
-  padding-right: 3.5rem;
-}
-
-.pw-toggle:hover {
-  color: #f9f7f7;
-}
-
-.editing-row td {
-  background: rgba(63, 114, 175, 0.15);
-}
-
-.edit-input:focus {
-  border-color: #3f72af;
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
-}
-.edit-username {
-  width: 140px;
-}
-.edit-pw-wrap {
-  width: 240px;
-}
-.edit-pw-wrap input {
-  width: 100%;
-}
-.staff-password-form {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.staff-password-wrap {
-  width: 190px;
-}
-
-.staff-password-input:focus {
-  border-color: #3f72af;
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
-}
-.staff-password-input::placeholder {
-  color: #dbe2ef;
-}
-</style>
+<!-- View-specific styles (Manage Staff) -->
+<link rel="stylesheet" href="css/staff.css">
 
 <!-- ═══════ Password toggle script ═══════ -->
 <script>

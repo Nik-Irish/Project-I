@@ -1,0 +1,25 @@
+/* IMS Nepal — Products list view (dashboard.php?view=list) — loaded by views/products.php */
+
+.btn-info {
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+.btn-info:hover {
+  background: rgba(99, 102, 241, 0.35);
+}
+
+.cell-desc {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.link-name {
+  color: #e2e8f0;
+  text-decoration: none;
+}
+.link-name:hover {
+  color: var(--blue, #3f72af);
+  text-decoration: underline;
+}
