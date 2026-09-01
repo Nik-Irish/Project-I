@@ -70,7 +70,7 @@ if ($ok) {
     <a class="retry" href="install.php">Try Again</a>
     <p class="hint">
         Make sure MySQL is running on port <?php echo $port; ?>.<br>
-        Default admin credentials: <strong>admin</strong> / Password123!<br>
+        Default admin credentials: <strong>admin</strong> / Password123$<br>
         Staff accounts can be created from the login page.
     </p>
 </div>
