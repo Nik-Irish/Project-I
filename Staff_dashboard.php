@@ -32,14 +32,14 @@ $errorMessage = '';
 $successMessage = '';
 
 $products = $pdo->query('SELECT * FROM products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
-$salesStmt = $pdo->prepare('SELECT * FROM sales WHERE staff_id = ? ORDER BY sale_date DESC, created_at DESC');
-$salesStmt->execute([$_SESSION['user_id']]);
+$salesStmt = $pdo->prepare('SELECT * FROM sales WHERE staff_name = ? ORDER BY sale_date DESC, created_at DESC');
+$salesStmt->execute([$_SESSION['username']]);
 $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // download bill as pdf — staff may only download their own sales
 if (($_GET['download'] ?? '') === 'pdf' && isset($_GET['sale_id'])) {
     $dl = getSale($pdo, (int)$_GET['sale_id']);
-    if (!$dl || (int)$dl['staff_id'] !== (int)$_SESSION['user_id']) {
+    if (!$dl || ($dl['staff_name'] ?? '') !== $_SESSION['username']) {
         http_response_code(404);
         echo 'Bill not found.';
         exit;
@@ -81,13 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sale'
             $customerPhone,
             $note,
             $saleDate,
-            (int)$_SESSION['user_id'],
             $_SESSION['username']
         );
 
         $successMessage = 'Sale recorded. Bill No: ' . $sale['bill_no'] . '.';
         $view = 'sales';
-        $salesStmt->execute([$_SESSION['user_id']]);
+        $salesStmt->execute([$_SESSION['username']]);
         $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

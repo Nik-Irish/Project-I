@@ -41,7 +41,6 @@ function recordSale(
     string $customerPhone,
     string $note,
     string $saleDate,
-    ?int $staffId = null,
     ?string $staffName = null
 ): array {
     $subtotal = round($unitPrice * $quantity, 2);
@@ -54,8 +53,8 @@ function recordSale(
         ->execute([$newQuantity, (int)$product['id']]);
 
     $pdo->prepare(
-        "INSERT INTO sales (bill_no, product_id, product_name, product_sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_id, staff_name)
-         VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO sales (bill_no, product_id, product_name, product_sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_name)
+         VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     )->execute([
         $product['product_id'],
         $product['name'],
@@ -68,7 +67,6 @@ function recordSale(
         $customerPhone,
         $note,
         $saleDate,
-        $staffId,
         $staffName,
     ]);
 

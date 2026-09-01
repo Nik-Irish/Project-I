@@ -23,3 +23,57 @@
   color: var(--blue, #3f72af);
   text-decoration: underline;
 }
+
+/* --- Add Product: Product-ID suggestions (views/add_product.php) --- */
+
+.pid-wrap {
+  position: relative;
+}
+
+.pid-list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.pid-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.pid-item:last-child {
+  border-bottom: none;
+}
+.pid-item:hover {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+.pid-code {
+  font-weight: 600;
+  color: #a5b4fc;
+}
+
+.pid-meta {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}

@@ -65,7 +65,6 @@ function tableDefinitions(): array
             customer_phone VARCHAR(40) NULL,
             note VARCHAR(255) NULL,
             sale_date DATE NOT NULL,
-            staff_id INT UNSIGNED NULL,
             staff_name VARCHAR(100) NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),

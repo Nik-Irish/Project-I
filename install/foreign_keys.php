@@ -17,7 +17,6 @@ function fkDefinitions(): array
         ['sales',         'fk_sales_product',         'product_id',  'products(product_id)', 'RESTRICT'],
         ['sales',         'fk_sales_sku',             'product_sku', 'products(product_id)', 'RESTRICT'],
         ['notifications', 'fk_notifications_product', 'product_id',  'products(product_id)', 'SET NULL'],
-        ['sales',         'fk_sales_staff',           'staff_id',    'users(id)',            'SET NULL'],
     ];
 }
 

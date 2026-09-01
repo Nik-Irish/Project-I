@@ -5,7 +5,7 @@
  * Do not open directly — included by dashboard.php → dashboard/handlers.php.
  *
  * Helper functions used: getProduct(), logMovement(),
- *                        checkStockNotification(), checkProductCountNotification()
+ *                        checkStockNotification(),                checkProductCountNotification()
  *
  * @var PDO    $pdo            Database connection (config/db.php)
  * @var string $action         POST action name (dashboard/handlers.php)
@@ -39,13 +39,30 @@ if ($action === 'add') {
         $errorMessage = 'Quantity must be a whole number.';
         $view = 'add';
     } else {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE product_id=?");
+        $q = (int)$qty;
+
+        $stmt = $pdo->prepare("SELECT * FROM products WHERE product_id=?");
         $stmt->execute([$productId]);
-        if ((int)$stmt->fetchColumn() > 0) {
-            $errorMessage = 'This Product-ID already exists.';
-            $view = 'add';
+        $existing = $stmt->fetch();
+
+        if ($existing) {
+            // Product-ID already exists → treat as Stock In: add the quantity
+            $newQty = (int)$existing['quantity'] + $q;
+            $pdo->prepare("UPDATE products SET quantity=? WHERE id=?")
+                ->execute([$newQty, $existing['id']]);
+
+            logMovement($pdo, $productId, 'in', $q, $newQty, 'Stock in via Add Product');
+
+            $np = getProduct($pdo, (int)$existing['id']);
+            if ($newQty > 0 && $newQty <= LOW_STOCK_THRESHOLD) {
+                checkStockNotification($pdo, $np, LOW_STOCK_THRESHOLD + 1, $newQty);
+            } elseif ($newQty === 0) {
+                checkStockNotification($pdo, $np, 1, 0);
+            }
+
+            $successMessage = "'{$existing['name']}' already exists — added {$q} units. New quantity: {$newQty}.";
+            $view = 'list';
         } else {
-            $q = (int)$qty;
             $c = $cat !== '' ? $cat : 'General';
 
             $pdo->prepare("INSERT INTO products (name, product_id, category, price, quantity, description) VALUES (?, ?, ?, ?, ?, ?)")

@@ -22,9 +22,9 @@ function migrateSchema(PDO $pdo): array
         $pdo->exec("ALTER TABLE users ADD COLUMN email VARCHAR(150) NULL AFTER username, ADD UNIQUE KEY uq_users_email (email)");
         $messages[] = 'Added email column to users.';
     }
-    if (!columnExists($pdo, 'sales', 'staff_id')) {
-        $pdo->exec("ALTER TABLE sales ADD COLUMN staff_id INT UNSIGNED NULL AFTER sale_date, ADD COLUMN staff_name VARCHAR(100) NULL AFTER staff_id");
-        $messages[] = 'Added staff_id and staff_name to sales.';
+    if (!columnExists($pdo, 'sales', 'staff_name')) {
+        $pdo->exec("ALTER TABLE sales ADD COLUMN staff_name VARCHAR(100) NULL AFTER sale_date");
+        $messages[] = 'Added staff_name to sales.';
     }
     if (columnExists($pdo, 'products', 'sku')) {
         $pdo->exec("ALTER TABLE products DROP COLUMN sku");

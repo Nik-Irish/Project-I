@@ -51,7 +51,6 @@ if ($action === 'sale') {
             $cp,
             $note,
             $sd,
-            null,
             $_SESSION['username'] ?? 'admin'
         );
 
