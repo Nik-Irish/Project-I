@@ -49,32 +49,43 @@ function recordSale(
     $oldQuantity = (int)$product['quantity'];
     $newQuantity = $oldQuantity - $quantity;
 
-    $pdo->prepare('UPDATE products SET quantity=? WHERE id=?')
-        ->execute([$newQuantity, (int)$product['id']]);
+    // insert first, deduct stock second — everything in one transaction so a
+    // failure can never leave stock deducted without a matching sale record
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare(
+            "INSERT INTO sales (bill_no, product_id, product_name, product_sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_name)
+             VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        )->execute([
+            $product['product_id'],
+            $product['name'],
+            $product['product_id'],
+            $product['category'] ?? 'General',
+            $quantity,
+            $unitPrice,
+            $total,
+            $customerName,
+            $customerPhone,
+            $note,
+            $saleDate,
+            $staffName,
+        ]);
 
-    $pdo->prepare(
-        "INSERT INTO sales (bill_no, product_id, product_name, product_sku, category, quantity, unit_price, total, customer_name, customer_phone, note, sale_date, staff_name)
-         VALUES ('', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    )->execute([
-        $product['product_id'],
-        $product['name'],
-        $product['product_id'],
-        $product['category'] ?? 'General',
-        $quantity,
-        $unitPrice,
-        $total,
-        $customerName,
-        $customerPhone,
-        $note,
-        $saleDate,
-        $staffName,
-    ]);
+        $saleId = (int)$pdo->lastInsertId();
+        $billNo = makeBillNo($saleId);
+        $pdo->prepare('UPDATE sales SET bill_no=? WHERE id=?')->execute([$billNo, $saleId]);
 
-    $saleId = (int)$pdo->lastInsertId();
-    $billNo = makeBillNo($saleId);
-    $pdo->prepare('UPDATE sales SET bill_no=? WHERE id=?')->execute([$billNo, $saleId]);
+        $pdo->prepare('UPDATE products SET quantity=? WHERE id=?')
+            ->execute([$newQuantity, (int)$product['id']]);
 
-    logMovement($pdo, $product['product_id'], 'sale', $quantity, $newQuantity, 'Sale ' . $billNo);
+        logMovement($pdo, $product['product_id'], 'sale', $quantity, $newQuantity, 'Sale ' . $billNo);
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
     checkStockNotification($pdo, array_merge($product, ['quantity' => $newQuantity]), $oldQuantity, $newQuantity);
 
     return [

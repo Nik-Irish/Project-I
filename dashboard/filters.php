@@ -67,7 +67,8 @@ foreach ($filteredSales as $s) {
     $salesUnits += (int)$s['quantity'];
     $salesTotal += (float)$s['total'];
 
-    $pid = (int)$s['product_id'];
+    // group by the Product-ID code (NOT an int cast — codes like "B-33" would collapse to 0)
+    $pid = (string)($s['product_id'] !== null && $s['product_id'] !== '' ? $s['product_id'] : ($s['product_sku'] ?? ''));
     if (!isset($salesByProduct[$pid])) {
         $salesByProduct[$pid] = ['name' => $s['product_name'], 'product_sku' => $s['product_sku'], 'qty' => 0, 'total' => 0.0];
     }
