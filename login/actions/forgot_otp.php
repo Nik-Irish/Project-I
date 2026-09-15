@@ -1,6 +1,6 @@
 <?php
 /**
- * login/actions/forgot_otp.php — POST handler: forgot step 2 — verify OTP.
+ * login/actions/forgot_otp.php - POST handler: forgot step 2 - verify OTP.
  * Extracted verbatim from the original login.php (lines 371-475).
  */
 defined('LOGIN_CONTROLLER') || exit;

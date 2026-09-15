@@ -1,6 +1,6 @@
 <?php
 /**
- * views/inventory.php — Single product stock & history detail
+ * views/inventory.php - Single product stock & history detail
  *
  * Requires: $detailProduct, $partMovements, $partSales, LOW_STOCK_THRESHOLD
  */

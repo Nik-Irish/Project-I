@@ -1,12 +1,12 @@
 <?php
 /**
- * views/products.php — Product list
+ * views/products.php - Product list
  *
  * Requires: $filtered, $search, $totalProducts, $totalStock,
  *           $totalValue, $lowStockCount, LOW_STOCK_THRESHOLD
  */
 
-// defensive defaults — $search/$filtered are normally set by dashboard/filters.php
+// defensive defaults - $search/$filtered are normally set by dashboard/filters.php
 $search = $search ?? '';
 $filtered = $filtered ?? [];
 
@@ -57,8 +57,13 @@ $filtered = $filtered ?? [];
 <div class="table-wrap">
     <?php if (empty($filtered)): ?>
         <div class="empty-state">
-            <p>No products found.</p>
-            <a href="dashboard.php?view=add" class="btn btn-primary">Add first product</a>
+            <?php if ($search !== ''): ?>
+                <p>No products match "<?php echo htmlspecialchars($search); ?>".</p>
+                <a href="dashboard.php?view=list" class="btn btn-secondary">Clear Search</a>
+            <?php else: ?>
+                <p>No products yet. Add one to start tracking stock.</p>
+                <a href="dashboard.php?view=add" class="btn btn-primary">Add Your First Product</a>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <table class="data-table">

@@ -1,14 +1,14 @@
 <?php
 /**
- * install.php — Run once to create the database, tables, foreign keys,
+ * install.php - Run once to create the database, tables, foreign keys,
  * and the default admin. Redirects to login.php on success.
  *
  * Parts live in the install/ folder:
- *   helpers.php      — connection + schema-check helpers
- *   schema.php       — table definitions + createTables()
- *   migrations.php   — upgrades for older installs
- *   foreign_keys.php — connects related tables
- *   admin.php        — default admin account
+ *   helpers.php      - connection + schema-check helpers
+ *   schema.php       - table definitions + createTables()
+ *   migrations.php   - upgrades for older installs
+ *   foreign_keys.php - connects related tables
+ *   admin.php        - default admin account
  */
 
 define('INSTALL_APP', true);
@@ -57,7 +57,7 @@ if ($ok) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IMS Nepal — Installation Failed</title>
+    <title>Installation Failed | IMS Nepal</title>
 </head>
 <body>
 <div class="box">
@@ -67,11 +67,11 @@ if ($ok) {
             <li><?php echo htmlspecialchars($m); ?></li>
         <?php endforeach; ?>
     </ul>
-    <a class="retry" href="install.php">Try Again</a>
+    <a class="retry" href="install.php">Retry Installation</a>
     <p class="hint">
-        Make sure MySQL is running on port <?php echo $port; ?>.<br>
-        Default admin credentials: <strong>admin</strong> / Password123$<br>
-        Staff accounts can be created from the login page.
+        1. Start MySQL on port <?php echo $port; ?>.<br>
+        2. Click Retry Installation.<br>
+        Admin login after install: <strong>admin</strong> / Password123$
     </p>
 </div>
 </body>

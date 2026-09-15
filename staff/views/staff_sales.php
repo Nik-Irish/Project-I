@@ -10,7 +10,10 @@
 
 <div class="table-wrap">
     <?php if (empty($sales)): ?>
-        <div class="empty-state"><p>No sales recorded yet.</p></div>
+        <div class="empty-state">
+            <p>You haven't recorded a sale yet.</p>
+            <a href="Staff_dashboard.php?view=sale_add" class="btn btn-primary">Record Your First Sale</a>
+        </div>
     <?php else: ?>
         <table class="data-table">
             <thead>
@@ -33,7 +36,7 @@
                     <td><?php echo htmlspecialchars($sale['sale_date']); ?></td>
                     <td>
                         <a href="Staff_dashboard.php?download=pdf&sale_id=<?php echo (int)$sale['id']; ?>"
-                           class="btn btn-sm btn-secondary">PDF</a>
+                           class="btn btn-sm btn-secondary">Download PDF</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

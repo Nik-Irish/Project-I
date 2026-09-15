@@ -1,8 +1,8 @@
 <?php
 /**
- * dashboard/helpers.php — Lookup & list helpers for the admin dashboard.
+ * dashboard/helpers.php - Lookup & list helpers for the admin dashboard.
  * Extracted from dashboard.php (no side effects, only function definitions).
- * Do not open directly — included by dashboard.php and Staff_dashboard.php
+ * Do not open directly - included by dashboard.php and Staff_dashboard.php
  * (both define DASHBOARD_CONTROLLER before including).
  */
 

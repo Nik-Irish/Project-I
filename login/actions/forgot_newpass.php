@@ -1,6 +1,6 @@
 <?php
 /**
- * login/actions/forgot_newpass.php — POST handler: forgot step 3 — set new password.
+ * login/actions/forgot_newpass.php - POST handler: forgot step 3 - set new password.
  * Extracted verbatim from the original login.php (lines 481-585).
  */
 defined('LOGIN_CONTROLLER') || exit;

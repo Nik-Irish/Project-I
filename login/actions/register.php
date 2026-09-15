@@ -1,6 +1,6 @@
 <?php
 /**
- * login/actions/register.php — POST handler: create staff account.
+ * login/actions/register.php - POST handler: create staff account.
  * Extracted verbatim from the original login.php (lines 112-239).
  */
 defined('LOGIN_CONTROLLER') || exit;

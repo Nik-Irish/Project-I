@@ -13,7 +13,7 @@
 
 <div class="table-wrap">
     <?php if (empty($products)): ?>
-        <div class="empty-state"><p>No products available.</p></div>
+        <div class="empty-state"><p>No products yet. The admin adds products from the admin dashboard.</p></div>
     <?php else: ?>
         <table class="data-table">
             <thead>

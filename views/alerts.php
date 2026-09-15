@@ -1,6 +1,6 @@
 <?php
 /**
- * views/alerts.php — System alerts (renamed from Notifications)
+ * views/alerts.php - System alerts (renamed from Notifications)
  *
  * Requires: $sortedNotifications, $unreadNotifications
  */
@@ -11,14 +11,14 @@
     <form method="POST" action="dashboard.php?view=notifications">
         <button type="submit" name="action" value="mark_all_read"
                 class="btn btn-secondary">
-            Mark All Read
+            Mark All as Read
         </button>
     </form>
     <form method="POST" action="dashboard.php?view=notifications"
-          onsubmit="return confirm('Clear all alerts? This cannot be undone.');">
+          onsubmit="return confirm('Delete all alerts? This cannot be undone.');">
         <button type="submit" name="action" value="clear_notifications"
                 class="btn btn-danger">
-            Clear All
+            Delete All Alerts
         </button>
     </form>
 </div>
@@ -26,7 +26,7 @@
 <!-- Alerts table -->
 <div class="table-wrap">
     <?php if (empty($sortedNotifications)): ?>
-        <div class="empty-state"><p>No alerts at this time.</p></div>
+        <div class="empty-state"><p>No alerts. Every product is above the low-stock limit.</p></div>
     <?php else: ?>
         <table class="data-table">
             <thead>
@@ -56,10 +56,10 @@
                     <td>
                         <?php if (!empty($n['product_id'])): ?>
                             <a href="dashboard.php?view=inventory&id=<?php echo urlencode($n['product_id']); ?>">
-                                View
+                                View Product
                             </a>
                         <?php else: ?>
-                            —
+                            -
                         <?php endif; ?>
                     </td>
 

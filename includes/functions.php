@@ -15,7 +15,7 @@ function shortText(string $text, int $max = 48): string {
         : substr($text, 0, $max - 1) . '…';
 }
 
-// NOTE: makeBillNo() lives in pdf_invoice.php — do NOT redeclare it here.
+// NOTE: makeBillNo() lives in pdf_invoice.php - do NOT redeclare it here.
 
 // ── Log a stock movement ──────────────────────────────────────────────────────
 function logMovement(
@@ -49,7 +49,7 @@ function recordSale(
     $oldQuantity = (int)$product['quantity'];
     $newQuantity = $oldQuantity - $quantity;
 
-    // insert first, deduct stock second — everything in one transaction so a
+    // insert first, deduct stock second - everything in one transaction so a
     // failure can never leave stock deducted without a matching sale record
     $pdo->beginTransaction();
     try {

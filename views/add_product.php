@@ -1,6 +1,6 @@
 <?php
 /**
- * views/add_product.php — Add a new product
+ * views/add_product.php - Add a new product
  *
  * Requires: $products (existing product list, for Product-ID suggestions)
  */
@@ -18,7 +18,7 @@ foreach ($products ?? [] as $p) {
 
 <div class="form-card">
     <h2>New Product</h2>
-    <p class="form-hint">Fill in the details below to add a product to inventory.</p>
+    <p class="form-hint">New Product-ID creates a product. An existing one adds stock to it instead.</p>
 
     <form method="POST" action="dashboard.php?view=add">
         <input type="hidden" name="action" value="add">

@@ -1,6 +1,6 @@
 <?php
 /**
- * config/connector.php — Database connection
+ * config/connector.php - Database connection
  * Included by dashboard.php and any other file needing $pdo.
  */
 

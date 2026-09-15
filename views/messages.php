@@ -1,8 +1,8 @@
 <?php
 /**
- * views/messages.php — Error/success messages + unread alert banner.
+ * views/messages.php - Error/success messages + unread alert banner.
  * Extracted from dashboard.php; included after includes/header.php.
- * Do not open directly — included by dashboard.php.
+ * Do not open directly - included by dashboard.php.
  *
  * Context variables provided by dashboard.php:
  *
@@ -32,8 +32,8 @@ if (!defined('DASHBOARD_CONTROLLER')) {
 <?php if (!empty($bannerNotes) && $view !== 'notifications'): ?>
     <div class="notif-banner">
         <div class="notif-banner-title">
-            Alerts (<?php echo $unreadNotifications; ?> unread)
-            <a href="dashboard.php?view=notifications">View all</a>
+            <?php echo $unreadNotifications; ?> <?php echo $unreadNotifications === 1 ? 'Alert Needs' : 'Alerts Need'; ?> Action
+            <a href="dashboard.php?view=notifications">View All Alerts</a>
         </div>
         <ul class="notif-banner-list">
             <?php foreach ($bannerNotes as $bn): ?>
@@ -41,7 +41,7 @@ if (!defined('DASHBOARD_CONTROLLER')) {
                     <strong><?php echo htmlspecialchars($bn['title'] ?? 'Alert'); ?>:</strong>
                     <?php echo htmlspecialchars($bn['message'] ?? ''); ?>
                     <?php if (!empty($bn['product_id'])): ?>
-                        <a href="dashboard.php?view=inventory&id=<?php echo urlencode($bn['product_id']); ?>">View</a>
+                        <a href="dashboard.php?view=inventory&id=<?php echo urlencode($bn['product_id']); ?>">View Product</a>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

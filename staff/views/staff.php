@@ -1,6 +1,6 @@
 <?php
 /**
- * views/staff.php — Manage staff accounts
+ * views/staff.php - Manage staff accounts
  *
  * Requires: $staffUsers (array), $editStaff (array|null)
  */

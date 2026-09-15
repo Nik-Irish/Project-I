@@ -1,7 +1,7 @@
 <?php
 /**
- * dashboard/handlers.php — POST action dispatch + post-action refresh.
- * Extracted from dashboard.php. Do not open directly — included by dashboard.php.
+ * dashboard/handlers.php - POST action dispatch + post-action refresh.
+ * Extracted from dashboard.php. Do not open directly - included by dashboard.php.
  *
  * Helper functions used: getProduct(), getSale(), getStaff(), loadLists()
  *

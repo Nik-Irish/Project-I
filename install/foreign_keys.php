@@ -1,6 +1,6 @@
 <?php
 /**
- * install/foreign_keys.php — connects related tables (same-named columns stay in sync).
+ * install/foreign_keys.php - connects related tables (same-named columns stay in sync).
  * Included by install.php (which defines INSTALL_APP). Do not open directly.
  */
 

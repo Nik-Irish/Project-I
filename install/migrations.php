@@ -1,6 +1,6 @@
 <?php
 /**
- * install/migrations.php — schema upgrades for older installs.
+ * install/migrations.php - schema upgrades for older installs.
  * Included by install.php (which defines INSTALL_APP). Do not open directly.
  */
 

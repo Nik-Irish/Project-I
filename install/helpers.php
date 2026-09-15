@@ -1,6 +1,6 @@
 <?php
 /**
- * install/helpers.php — shared helpers for the installer.
+ * install/helpers.php - shared helpers for the installer.
  * Included by install.php (which defines INSTALL_APP). Do not open directly.
  */
 

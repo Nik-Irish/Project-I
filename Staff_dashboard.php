@@ -36,7 +36,7 @@ $salesStmt = $pdo->prepare('SELECT * FROM sales WHERE staff_name = ? ORDER BY sa
 $salesStmt->execute([$_SESSION['username']]);
 $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// download bill as pdf — staff may only download their own sales
+// download bill as pdf - staff may only download their own sales
 if (($_GET['download'] ?? '') === 'pdf' && isset($_GET['sale_id'])) {
     $dl = getSale($pdo, (int)$_GET['sale_id']);
     if (!$dl || ($dl['staff_name'] ?? '') !== $_SESSION['username']) {
@@ -97,9 +97,9 @@ $pageTitles = [
     'sales' => 'My Sales',
 ];
 $pageSub = [
-    'list' => 'Overview of available items',
-    'sale_add' => 'Record a sale quickly',
-    'sales' => 'Your recent sales',
+    'list' => 'Check stock before you sell.',
+    'sale_add' => 'Stock and totals update the moment you save.',
+    'sales' => 'Every sale you recorded, with PDF receipts.',
 ];
 $dashboardScript = 'Staff_dashboard.php';
 $pageTitle = $pageTitles[$view] ?? 'Dashboard';

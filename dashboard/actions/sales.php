@@ -1,8 +1,8 @@
 <?php
 /**
- * dashboard/actions/sales.php — Sale POST actions.
+ * dashboard/actions/sales.php - Sale POST actions.
  * Extracted from dashboard.php; runs inside the POST branch of handlers.php.
- * Do not open directly — included by dashboard.php → dashboard/handlers.php.
+ * Do not open directly - included by dashboard.php → dashboard/handlers.php.
  *
  * Helper functions used: getProduct(), getSale(), recordSale(), logMovement()
  *

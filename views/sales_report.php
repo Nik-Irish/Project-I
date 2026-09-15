@@ -1,6 +1,6 @@
 <?php
 /**
- * views/sales_report.php — Sales transaction list with filters
+ * views/sales_report.php - Sales transaction list with filters
  *
  * Requires: $filteredSales, $products, $categories,
  *           $reportFrom, $reportTo, $reportProductId, $reportCategory
@@ -48,7 +48,10 @@ $reportCategory = $reportCategory ?? '';
 
 <div class="table-wrap">
     <?php if (empty($filteredSales)): ?>
-        <div class="empty-state"><p>No sales found for the selected filters.</p></div>
+        <div class="empty-state">
+            <p>No sales match these filters.</p>
+            <a href="dashboard.php?view=sales" class="btn btn-secondary">Clear Filters</a>
+        </div>
     <?php else: ?>
         <table class="data-table">
             <thead>
@@ -79,7 +82,7 @@ $reportCategory = $reportCategory ?? '';
                     <td><?php echo htmlspecialchars($s['sale_date']); ?></td>
                     <td>
                         <a href="dashboard.php?download=pdf&sale_id=<?php echo (int)$s['id']; ?>"
-                           class="btn btn-sm btn-secondary">PDF</a>
+                           class="btn btn-sm btn-secondary">Download PDF</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

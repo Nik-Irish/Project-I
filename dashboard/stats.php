@@ -1,7 +1,7 @@
 <?php
 /**
- * dashboard/stats.php — Dashboard stats, alert-banner data, and page titles.
- * Extracted from dashboard.php. Do not open directly — included by dashboard.php.
+ * dashboard/stats.php - Dashboard stats, alert-banner data, and page titles.
+ * Extracted from dashboard.php. Do not open directly - included by dashboard.php.
  *
  * Context variables provided by dashboard.php:
  *
@@ -34,14 +34,15 @@ $pageTitles = [
 ];
 
 $pageSub = [
-    'add' => 'Add a new product to the catalog',
-    'edit' => 'Update product details',
-    'sales' => 'View all recorded sales',
-    'sale_add' => 'Record a new sale transaction',
-    'inventory' => 'Stock and sales history for this product',
-    'report' => 'Aggregated sales figures',
-    'notifications' => 'System alerts and stock warnings',
-    'staff' => 'Edit or remove staff accounts',
+    'list' => 'Stock counts, inventory value, and low-stock warnings on one screen.',
+    'add' => 'Five fields. Your product is trackable the moment you save.',
+    'edit' => 'Change price or quantity. Past sales and stock history stay untouched.',
+    'sales' => 'Every sale with bill number and PDF invoice.',
+    'sale_add' => 'Stock and revenue update the moment you save.',
+    'inventory' => 'Full movement and sales history for this Product-ID.',
+    'report' => 'Totals by product, by staff, and by day.',
+    'notifications' => 'Low-stock warnings, newest first.',
+    'staff' => 'Add staff, reset passwords, delete accounts.',
 ];
 
 $pageTitle = $pageTitles[$view] ?? 'Dashboard';

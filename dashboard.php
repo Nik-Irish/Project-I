@@ -1,6 +1,6 @@
 <?php
 /**
- * dashboard.php — Admin dashboard controller (refactored).
+ * dashboard.php - Admin dashboard controller (refactored).
  *
  * This file is now only the auth gate + orchestrator. The logic lives in:
  *

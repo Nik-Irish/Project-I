@@ -1,6 +1,6 @@
 <?php
 /**
- * views/edit_product.php — Edit an existing product
+ * views/edit_product.php - Edit an existing product
  *
  * Requires: $editProduct (associative array)
  */
@@ -11,6 +11,7 @@ if (!is_array($editProduct)) {
 ?>
 <div class="form-card">
     <h2>Edit Product #<?php echo (int)$editProduct['id']; ?></h2>
+    <p class="form-hint">Price and quantity update now. Past sales and movements stay untouched.</p>
 
     <form method="POST"
           action="dashboard.php?view=edit&id=<?php echo (int)$editProduct['id']; ?>">

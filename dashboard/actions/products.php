@@ -1,8 +1,8 @@
 <?php
 /**
- * dashboard/actions/products.php — Product POST actions.
+ * dashboard/actions/products.php - Product POST actions.
  * Extracted from dashboard.php; runs inside the POST branch of handlers.php.
- * Do not open directly — included by dashboard.php → dashboard/handlers.php.
+ * Do not open directly - included by dashboard.php → dashboard/handlers.php.
  *
  * Helper functions used: getProduct(), logMovement(),
  *                        checkStockNotification(),                checkProductCountNotification()
@@ -60,7 +60,7 @@ if ($action === 'add') {
                 checkStockNotification($pdo, $np, 1, 0);
             }
 
-            $successMessage = "'{$existing['name']}' already exists — added {$q} units. New quantity: {$newQty}.";
+            $successMessage = "'{$existing['name']}' already exists: added {$q} units. New quantity: {$newQty}.";
             $view = 'list';
         } else {
             $c = $cat !== '' ? $cat : 'General';

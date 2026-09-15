@@ -1,6 +1,6 @@
 <?php
 /**
- * login/actions/forgot_email.php — POST handler: forgot step 1 — username + email, send OTP.
+ * login/actions/forgot_email.php - POST handler: forgot step 1 - username + email, send OTP.
  * Extracted verbatim from the original login.php (lines 245-365).
  */
 defined('LOGIN_CONTROLLER') || exit;

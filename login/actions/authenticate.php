@@ -1,6 +1,6 @@
 <?php
 /**
- * login/actions/authenticate.php — POST handler: login — verify credentials, redirect by role.
+ * login/actions/authenticate.php - POST handler: login - verify credentials, redirect by role.
  * Extracted verbatim from the original login.php (lines 589-656).
  */
 defined('LOGIN_CONTROLLER') || exit;

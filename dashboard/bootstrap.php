@@ -1,7 +1,7 @@
 <?php
 /**
- * dashboard/bootstrap.php — Request state & GET routing.
- * Extracted from dashboard.php. Do not open directly — included by dashboard.php.
+ * dashboard/bootstrap.php - Request state & GET routing.
+ * Extracted from dashboard.php. Do not open directly - included by dashboard.php.
  *
  * Helper functions used: downloadInvoicePdf(), getProduct(), getSale(),
  *                        getStaff(), loadLists()

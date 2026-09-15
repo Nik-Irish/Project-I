@@ -1,8 +1,8 @@
 <?php
 /**
- * dashboard/filters.php — Product search, sales filters, report aggregation,
+ * dashboard/filters.php - Product search, sales filters, report aggregation,
  * and per-product inventory history. Extracted from dashboard.php.
- * Do not open directly — included by dashboard.php.
+ * Do not open directly - included by dashboard.php.
  *
  * Variables this file sets for the rest of the request:
  *     $filtered, $search, $reportFrom, $reportTo, $reportProductId,
@@ -67,7 +67,7 @@ foreach ($filteredSales as $s) {
     $salesUnits += (int)$s['quantity'];
     $salesTotal += (float)$s['total'];
 
-    // group by the Product-ID code (NOT an int cast — codes like "B-33" would collapse to 0)
+    // group by the Product-ID code (NOT an int cast - codes like "B-33" would collapse to 0)
     $pid = (string)($s['product_id'] !== null && $s['product_id'] !== '' ? $s['product_id'] : ($s['product_sku'] ?? ''));
     if (!isset($salesByProduct[$pid])) {
         $salesByProduct[$pid] = ['name' => $s['product_name'], 'product_sku' => $s['product_sku'], 'qty' => 0, 'total' => 0.0];

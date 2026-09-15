@@ -1,6 +1,6 @@
 <?php
 /**
- * install/admin.php — default admin account creation/reset.
+ * install/admin.php - default admin account creation/reset.
  * Included by install.php (which defines INSTALL_APP). Do not open directly.
  */
 

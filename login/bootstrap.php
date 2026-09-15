@@ -1,6 +1,6 @@
 <?php
 /**
- * login/bootstrap.php — session, Mailer, DB connection, mode
+ * login/bootstrap.php - session, Mailer, DB connection, mode
  * selection and reset-stage setup for login.php.
  * Body extracted verbatim from the original login.php (lines 1-105).
  */

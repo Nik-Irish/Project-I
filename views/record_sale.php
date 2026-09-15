@@ -1,6 +1,6 @@
 <?php
 /**
- * views/record_sale.php — Record a new sale
+ * views/record_sale.php - Record a new sale
  *
  * Requires: $products (array)
  */
@@ -11,8 +11,8 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
 
     <?php if (empty($products)): ?>
         <div class="empty-state">
-            <p>No products in stock. Add a product first.</p>
-            <a href="<?php echo htmlspecialchars($dashboardScript); ?>?view=add" class="btn btn-primary">Add Product</a>
+            <p>You need a product before you can record a sale.</p>
+            <a href="<?php echo htmlspecialchars($dashboardScript); ?>?view=add" class="btn btn-primary">Add Your First Product</a>
         </div>
     <?php else: ?>
         <form method="POST" action="<?php echo htmlspecialchars($dashboardScript); ?>?view=sale_add">
@@ -35,15 +35,15 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
                 <div class="form-group full">
                     <label>Product <span class="req">*</span></label>
                     <select id="product_id" name="product_id" required>
-                        <option value="">— Select a product —</option>
+                        <option value="">Select a product</option>
                         <?php foreach ($products as $p): ?>
                             <option value="<?php echo (int)$p['id']; ?>"
                                     data-price="<?php echo (float)$p['price']; ?>"
                                     data-stock="<?php echo (int)$p['quantity']; ?>">
                                 <?php echo htmlspecialchars(
                                     $p['name']
-                                    . ' (Product-ID: ' . $p['product_id'] . ')'
-                                    . ' — Stock: ' . $p['quantity']
+                                    . ' (' . $p['product_id'] . ')'
+                                    . ' · Stock: ' . $p['quantity']
                                 ); ?>
                             </option>
                         <?php endforeach; ?>
@@ -82,11 +82,11 @@ $dashboardScript = $dashboardScript ?? 'dashboard.php';
                  style="background:rgba(30,41,59,.6);border:1px solid #334155;
                         border-radius:8px;padding:.8rem 1rem;
                         margin:.5rem 0 1rem;font-size:.88rem;display:none;">
-                <span>Subtotal: <strong id="prev-sub">—</strong></span>
+                <span>Subtotal: <strong id="prev-sub">Rs.0.00</strong></span>
                 &nbsp;|&nbsp;
-                <span>VAT 13%: <strong id="prev-tax">—</strong></span>
+                <span>VAT 13%: <strong id="prev-tax">Rs.0.00</strong></span>
                 &nbsp;|&nbsp;
-                <span>Total: <strong id="prev-total">—</strong></span>
+                <span>Total: <strong id="prev-total">Rs.0.00</strong></span>
             </div>
 
             <div class="form-actions">

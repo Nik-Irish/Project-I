@@ -1,9 +1,15 @@
 <?php
 /**
- * login/views/login_page.php — full login / register / forgot-password
+ * login/views/login_page.php - full login / register / forgot-password
  * HTML page. Extracted verbatim from the original login.php (lines 659-1245).
  */
 defined('LOGIN_CONTROLLER') || exit;
+
+// defaults; real values come from login/bootstrap.php
+$mode = $mode ?? 'login';
+$resetStage = $resetStage ?? 'email';
+$errorMessage = $errorMessage ?? '';
+$successMessage = $successMessage ?? '';
 
 $pageTitles = [
 
@@ -73,7 +79,7 @@ $pageTitle =
             $mode === 'register'
         ): ?>
 
-            Create your account
+            One account lets you record sales as staff.
         <?php elseif (
             $mode === 'forgot' &&
             $resetStage === 'email'
@@ -94,7 +100,7 @@ $pageTitle =
             Set your new password
         <?php else: ?>
 
-            Welcome to IMS Nepal
+            Log in to manage stock and sales.
 
         <?php endif; ?>
     </p>

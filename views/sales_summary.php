@@ -1,6 +1,6 @@
 <?php
 /**
- * views/sales_summary.php — Aggregated sales totals
+ * views/sales_summary.php - Aggregated sales totals
  *
  * Requires: $filteredSales, $salesUnits, $salesTotal,
  *           $salesByProduct, $salesByDay,
@@ -58,7 +58,7 @@ $reportCategory = $reportCategory ?? '';
         <div class="stat-value"><?php echo $salesUnits; ?></div>
     </div>
     <div class="stat-card">
-        <div class="stat-label">Total (incl. VAT)</div>
+        <div class="stat-label">Revenue (incl. 13% VAT)</div>
         <div class="stat-value">Rs.<?php echo number_format($salesTotal, 2); ?></div>
     </div>
     <div class="stat-card">

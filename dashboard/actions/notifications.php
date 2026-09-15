@@ -1,8 +1,8 @@
 <?php
 /**
- * dashboard/actions/notifications.php — Alert (notification) POST actions.
+ * dashboard/actions/notifications.php - Alert (notification) POST actions.
  * Extracted from dashboard.php; runs inside the POST branch of handlers.php.
- * Do not open directly — included by dashboard.php → dashboard/handlers.php.
+ * Do not open directly - included by dashboard.php → dashboard/handlers.php.
  *
  * @var PDO    $pdo            Database connection (config/db.php)
  * @var string $action         POST action name (dashboard/handlers.php)
