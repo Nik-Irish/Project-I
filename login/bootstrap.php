@@ -10,7 +10,7 @@ defined('LOGIN_CONTROLLER') || exit;
 
 session_start();
 
-require_once __DIR__ . '/../Mailer.php';
+require_once __DIR__ . '/../includes/Mailer.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 $errorMessage = '';

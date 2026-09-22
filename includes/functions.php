@@ -24,7 +24,7 @@ function shortText(string $text, int $max = 48): string {
         : substr($text, 0, $max - 1) . '…';
 }
 
-// NOTE: makeBillNo() lives in pdf_invoice.php - do NOT redeclare it here.
+// NOTE: makeBillNo() lives in includes/invoice.php - do NOT redeclare it here.
 
 // ── Log a stock movement ──────────────────────────────────────────────────────
 function logMovement(
