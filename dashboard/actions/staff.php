@@ -19,8 +19,6 @@ if (!defined('DASHBOARD_CONTROLLER')) {
     exit('Direct access not allowed.');
 }
 
-$passwordRules = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/';
-
 if ($action === 'staff_create') {
     $newUser = trim($_POST['username'] ?? '');
     $newPass = trim($_POST['password'] ?? '');
@@ -29,7 +27,7 @@ if ($action === 'staff_create') {
         $errorMessage = 'Username and password are required.';
     } elseif (!preg_match('/^[a-zA-Z0-9]{3,15}$/', $newUser)) {
         $errorMessage = 'Username: 3-15 characters, letters and numbers only.';
-    } elseif (!preg_match($passwordRules, $newPass)) {
+    } elseif (!validPassword($newPass)) {
         $errorMessage = 'Password: 8+ chars, uppercase, lowercase, number, special character.';
     } else {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username=?");
@@ -63,7 +61,7 @@ if ($action === 'staff_update') {
         if ((int)$stmt->fetchColumn() > 0) {
             $errorMessage = 'Username already taken.';
             $view = 'staff';
-        } elseif ($newPass !== '' && !preg_match($passwordRules, $newPass)) {
+        } elseif ($newPass !== '' && !validPassword($newPass)) {
             $errorMessage = 'Password: 8+ chars, uppercase, lowercase, number, special character.';
             $view = 'staff';
         } else {
@@ -87,7 +85,7 @@ if ($action === 'staff_password_update') {
 
     if (!$staff) {
         $errorMessage = 'Staff account not found.';
-    } elseif (!preg_match($passwordRules, $newPass)) {
+    } elseif (!validPassword($newPass)) {
         $errorMessage = 'Password: 8+ chars, uppercase, lowercase, number, special character.';
     } else {
         $pdo->prepare("UPDATE users SET password_hash=? WHERE id=?")

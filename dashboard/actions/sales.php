@@ -19,43 +19,13 @@ if (!defined('DASHBOARD_CONTROLLER')) {
 }
 
 if ($action === 'sale') {
-    $pid = (int)($_POST['product_id'] ?? 0);
-    $qty = trim($_POST['quantity'] ?? '');
-    $up = trim($_POST['unit_price'] ?? '');
-    $note = trim($_POST['note'] ?? '');
-    $sd = date('Y-m-d');
-    $cn = trim($_POST['customer_name'] ?? '');
-    $cp = trim($_POST['customer_phone'] ?? '');
-    $p = getProduct($pdo, $pid);
-
-    if (!$p) {
-        $errorMessage = 'Select a valid product.';
-        $view = 'sale_add';
-    } elseif (!preg_match('/^\d+$/', $qty) || (int)$qty < 1) {
-        $errorMessage = 'Quantity must be at least 1.';
-        $view = 'sale_add';
-    } elseif ((int)$qty > (int)$p['quantity']) {
-        $errorMessage = 'Not enough stock. Available: ' . $p['quantity'] . '.';
-        $view = 'sale_add';
-    } else {
-        $qi = (int)$qty;
-        $pf = round((float)$p['price'], 2);
-        $custN = $cn !== '' ? $cn : 'Walk-in Customer';
-
-        $sale = recordSale(
-            $pdo,
-            $p,
-            $qi,
-            $pf,
-            $custN,
-            $cp,
-            $note,
-            $sd,
-            $_SESSION['username'] ?? 'admin'
-        );
-
-        $successMessage = 'Sale recorded. Bill No: ' . $sale['bill_no'] . '.';
+    $result = recordSaleFromPost($pdo);
+    if ($result['ok']) {
+        $successMessage = $result['message'];
         $view = 'sales';
+    } else {
+        $errorMessage = $result['message'];
+        $view = 'sale_add';
     }
 }
 

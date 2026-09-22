@@ -11,15 +11,10 @@ defined('LOGIN_CONTROLLER') || exit;
 session_start();
 
 require_once __DIR__ . '/../Mailer.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 $errorMessage = '';
 $successMessage = '';
-
-$dbHost = 'localhost';
-$dbPort = 3306;
-$dbUser = 'root';
-$dbPass = '';
-$dbName = 'ims';
 
 $allowedModes = [
     'login',
@@ -34,8 +29,7 @@ $mode = in_array(
 )
     ? $_GET['action']
     : 'login';
-$passwordRules =
-    '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/';
+$passwordRules = PASSWORD_RULES;
 if (
     $mode === 'forgot' &&
     isset($_GET['restart'])
@@ -71,22 +65,11 @@ if (
 }
 try {
 
-    $pdo = new PDO(
-        "mysql:host=$dbHost;port=$dbPort;charset=utf8mb4",
-        $dbUser,
-        $dbPass,
-        [
-            PDO::ATTR_ERRMODE =>
-                PDO::ERRMODE_EXCEPTION,
+    // shared DB connection (config/connector.php creates $pdo and selects ims)
+    require_once __DIR__ . '/../config/connector.php';
 
-            PDO::ATTR_DEFAULT_FETCH_MODE =>
-                PDO::FETCH_ASSOC
-        ]
-    );
-
-    $pdo->exec(
-        "USE `$dbName`"
-    );
+    // login actions rely on associative fetch as the default
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
 

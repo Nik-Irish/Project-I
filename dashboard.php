@@ -16,12 +16,8 @@
  * original single-file version.
  */
 
-session_start();
-
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php');
-    exit;
-}
+require_once __DIR__ . '/includes/auth.php';
+requireRole('admin');
 
 require_once __DIR__ . '/pdf_invoice.php';
 require_once __DIR__ . '/config/connector.php';

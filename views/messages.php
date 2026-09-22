@@ -17,6 +17,13 @@ if (!defined('DASHBOARD_CONTROLLER')) {
     http_response_code(403);
     exit('Direct access not allowed.');
 }
+
+// defaults so staff pages (no alerts) can include this partial safely
+$errorMessage = $errorMessage ?? '';
+$successMessage = $successMessage ?? '';
+$bannerNotes = $bannerNotes ?? [];
+$unreadNotifications = $unreadNotifications ?? 0;
+$view = $view ?? '';
 ?>
 <?php if ($errorMessage !== ''): ?>
     <div class="msg msg-error"><?php echo htmlspecialchars($errorMessage); ?></div>

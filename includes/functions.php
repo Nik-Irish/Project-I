@@ -8,6 +8,15 @@ define('LOW_STOCK_THRESHOLD', 10);
 define('PRODUCT_COUNT_ALERT', 10);
 define('TAX_RATE', 0.13);
 
+// Password policy: 8+ chars with lowercase, uppercase, digit, and special char.
+define('PASSWORD_RULES', '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/');
+
+function validPassword(string $password): bool
+{
+    return preg_match(PASSWORD_RULES, $password) === 1;
+}
+
+
 // ── Truncate long strings ─────────────────────────────────────────────────────
 function shortText(string $text, int $max = 48): string {
     return strlen($text) <= $max
@@ -162,4 +171,41 @@ function checkProductCountNotification(PDO $pdo, int $count): void {
         'The system now has ' . PRODUCT_COUNT_ALERT . ' products registered.',
         null
     );
+}
+
+// ── Validate + record a sale from the shared Record Sale form ────────────────
+// Used by the admin dashboard and the staff dashboard. Reads $_POST,
+// validates against stock, and returns [ok, message].
+function recordSaleFromPost(PDO $pdo): array
+{
+    $pid = (int)($_POST['product_id'] ?? 0);
+    $qty = trim($_POST['quantity'] ?? '');
+    $note = trim($_POST['note'] ?? '');
+    $customerName = trim($_POST['customer_name'] ?? '');
+    $customerPhone = trim($_POST['customer_phone'] ?? '');
+    $product = getProduct($pdo, $pid);
+
+    if (!$product) {
+        return ['ok' => false, 'message' => 'Select a valid product.'];
+    }
+    if (!preg_match('/^\d+$/', $qty) || (int)$qty < 1) {
+        return ['ok' => false, 'message' => 'Quantity must be at least 1.'];
+    }
+    if ((int)$qty > (int)$product['quantity']) {
+        return ['ok' => false, 'message' => 'Not enough stock. Available: ' . $product['quantity'] . '.'];
+    }
+
+    $sale = recordSale(
+        $pdo,
+        $product,
+        (int)$qty,
+        round((float)$product['price'], 2),
+        $customerName !== '' ? $customerName : 'Walk-in Customer',
+        $customerPhone,
+        $note,
+        date('Y-m-d'),
+        $_SESSION['username'] ?? 'admin'
+    );
+
+    return ['ok' => true, 'message' => 'Sale recorded. Bill No: ' . $sale['bill_no'] . '.'];
 }
