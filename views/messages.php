@@ -24,6 +24,7 @@ $successMessage = $successMessage ?? '';
 $bannerNotes = $bannerNotes ?? [];
 $unreadNotifications = $unreadNotifications ?? 0;
 $view = $view ?? '';
+$showAlerts = $showAlerts ?? false;
 ?>
 <?php if ($errorMessage !== ''): ?>
     <div class="msg msg-error"><?php echo htmlspecialchars($errorMessage); ?></div>
@@ -36,7 +37,7 @@ $view = $view ?? '';
 <!-- View-specific styles (alert banner) -->
 <link rel="stylesheet" href="css/banner.css">
 
-<?php if (!empty($bannerNotes) && $view !== 'notifications'): ?>
+<?php if (!empty($bannerNotes) && $showAlerts && $view !== 'notifications'): ?>
     <div class="notif-banner">
         <div class="notif-banner-title">
             <?php echo $unreadNotifications; ?> <?php echo $unreadNotifications === 1 ? 'Alert Needs' : 'Alerts Need'; ?> Action

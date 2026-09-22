@@ -27,6 +27,9 @@ $unreadNotifications = (int)$pdo->query("SELECT COUNT(*) FROM notifications WHER
 $sortedNotifications = $notifications;
 $bannerNotes = $pdo->query("SELECT * FROM notifications WHERE is_read=0 ORDER BY created_at DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
 
+// alerts (bell + banner) only on views where they are actionable
+$showAlerts = in_array($view, ['list', 'inventory', 'notifications'], true);
+
 $pageTitles = [
     'list' => 'Dashboard', 'add' => 'Add Product', 'edit' => 'Modify Product',
     'sales' => 'Sales Report', 'sale_add' => 'Record Sale', 'inventory' => 'Inventory Details',

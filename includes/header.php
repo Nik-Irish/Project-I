@@ -78,10 +78,12 @@ $unreadNotifications = $unreadNotifications ?? 0;
                     <?php echo htmlspecialchars($pageSub[$view] ?? ''); ?>
                 </p>
             </div>
-            <a href="dashboard.php?view=notifications" class="notif-bell">
-                Alerts
-                <?php if ($unreadNotifications > 0): ?>
-                    <span class="bell-count"><?php echo $unreadNotifications; ?></span>
-                <?php endif; ?>
-            </a>
+            <?php if (!empty($showAlerts)): ?>
+                <a href="dashboard.php?view=notifications" class="notif-bell">
+                    Alerts
+                    <?php if ($unreadNotifications > 0): ?>
+                        <span class="bell-count"><?php echo $unreadNotifications; ?></span>
+                    <?php endif; ?>
+                </a>
+            <?php endif; ?>
         </header>
