@@ -1,6 +1,6 @@
 /* IMS Nepal - Manage Staff view (dashboard.php?view=staff) - loaded by staff/views/staff.php */
 
-/* ── Password input wrapper (add form + inline edit) ─────────────────────── */
+/* ── Password input wrapper (all password fields on this page) ───────────── */
 .pw-input-wrap {
   position: relative;
   display: flex;
@@ -39,42 +39,43 @@
   box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
 }
 
-/* ── Add Staff button full-width ─────────────────────────────────────────── */
-.btn-block {
-  display: block;
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.7rem 1rem;
-}
-
 /* ── Add Staff card ──────────────────────────────────────────────────────── */
 .add-staff-card {
-  background: #131316;
-  border-color: #A1A1AA;
-}
-.add-staff-card h2,
-.add-staff-card .form-group label {
-  color: #FAFAFA;
-}
-.add-staff-card .form-group input {
-  color: #FAFAFA;
-  background: #09090B;
-  border-color: #27272A;
-}
-.add-staff-card .form-group input:focus {
-  border-color: #6366F1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  margin-bottom: 1.25rem;
 }
 
-/* ── Inline edit row ─────────────────────────────────────────────────────── */
+/* ── Staff table ─────────────────────────────────────────────────────────── */
+.staff-table .staff-username {
+  font-weight: 600;
+  color: var(--fg, #FAFAFA);
+}
+
+.staff-table .staff-added {
+  color: var(--fg-muted, #A1A1AA);
+  white-space: nowrap;
+}
+
+/* ── Inline edit row (?edit=ID) ──────────────────────────────────────────── */
 .inline-edit-form {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
+
 .editing-row td {
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.edit-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg, #FAFAFA);
+}
+
+.edit-optional {
+  font-weight: 400;
+  color: var(--fg-muted, #A1A1AA);
 }
 
 .edit-input {
@@ -82,7 +83,7 @@
   font-size: 0.85rem;
   color: var(--fg, #FAFAFA);
   background: #18181B;
-  border: 1px solid rgba(250, 250, 250, 0.3);
+  border: 1px solid rgba(250, 250, 250, 0.14);
   border-radius: 6px;
   outline: none;
   font-family: inherit;
@@ -92,7 +93,7 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 .edit-username {
-  width: 140px;
+  width: 150px;
 }
 .edit-pw-wrap {
   width: 240px;
@@ -101,22 +102,37 @@
   width: 100%;
 }
 
-/* ── Per-row password form ───────────────────────────────────────────────── */
-.staff-password-form {
+/* ── Collapsed reset-password row ────────────────────────────────────────── */
+.pw-reset-row {
+  display: none;
+}
+.pw-reset-row.open {
+  display: table-row;
+}
+
+.pw-reset-row > td {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.pw-reset-form {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
 }
-.staff-password-wrap {
-  width: 190px;
+
+.reset-pw-wrap {
+  width: 280px;
 }
+
 .staff-password-input {
   width: 100%;
   padding: 0.4rem 0.6rem;
   font-size: 0.82rem;
   color: var(--fg, #FAFAFA);
   background: #18181B;
-  border: 1px solid rgba(250, 250, 250, 0.3);
+  border: 1px solid rgba(250, 250, 250, 0.14);
   border-radius: 6px;
   outline: none;
   font-family: inherit;
@@ -129,12 +145,16 @@
   color: var(--fg-muted, #A1A1AA);
 }
 
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 760px) {
-  .staff-password-form {
+  .inline-edit-form,
+  .pw-reset-form {
     align-items: stretch;
     flex-direction: column;
   }
-  .staff-password-wrap {
+  .edit-username,
+  .edit-pw-wrap,
+  .reset-pw-wrap {
     width: 100%;
   }
 }
