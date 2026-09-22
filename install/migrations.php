@@ -1,7 +1,9 @@
 <?php
 /**
  * install/migrations.php - schema upgrades for older installs.
- * Included by install.php (which defines INSTALL_APP). Do not open directly.
+ * The statements live in sql/03_migrations.sql (keyed); this file decides
+ * WHICH statements run against the target database. Included by install.php
+ * (which defines INSTALL_APP). Do not open directly.
  */
 
 if (!defined('INSTALL_APP')) {
@@ -12,38 +14,39 @@ if (!defined('INSTALL_APP')) {
 function migrateSchema(PDO $pdo): array
 {
     $messages = [];
+    $sql = sqlStatementsByKey('03_migrations.sql');
 
     // add columns needed by older installs, if missing
     if (!columnExists($pdo, 'users', 'role')) {
-        $pdo->exec("ALTER TABLE users ADD COLUMN role ENUM('admin','staff') NOT NULL DEFAULT 'staff' AFTER password_hash");
+        $pdo->exec($sql['users.role']);
         $messages[] = 'Added role column to users.';
     }
     if (!columnExists($pdo, 'users', 'email')) {
-        $pdo->exec("ALTER TABLE users ADD COLUMN email VARCHAR(150) NULL AFTER username, ADD UNIQUE KEY uq_users_email (email)");
+        $pdo->exec($sql['users.email']);
         $messages[] = 'Added email column to users.';
     }
     if (!columnExists($pdo, 'sales', 'staff_name')) {
-        $pdo->exec("ALTER TABLE sales ADD COLUMN staff_name VARCHAR(100) NULL AFTER sale_date");
+        $pdo->exec($sql['sales.staff_name']);
         $messages[] = 'Added staff_name to sales.';
     }
     if (columnExists($pdo, 'products', 'sku')) {
-        $pdo->exec("ALTER TABLE products DROP COLUMN sku");
+        $pdo->exec($sql['products.drop_sku']);
         $messages[] = 'Removed sku column from products.';
     }
     // give existing rows a unique placeholder Product-ID so the UNIQUE key can be added
     if (!columnExists($pdo, 'products', 'product_id')) {
-        $pdo->exec("ALTER TABLE products ADD COLUMN product_id VARCHAR(50) NOT NULL AFTER name");
-        $pdo->exec("UPDATE products SET product_id = CONCAT('P', id) WHERE product_id = ''");
+        $pdo->exec($sql['products.product_id']);
+        $pdo->exec($sql['products.product_id_backfill']);
         $messages[] = 'Added product_id column to products.';
     }
     if (!indexExists($pdo, 'products', 'uq_products_product_id')) {
-        $pdo->exec("ALTER TABLE products ADD UNIQUE KEY uq_products_product_id (product_id)");
+        $pdo->exec($sql['products.uq_product_id']);
         $messages[] = 'Added unique key on products.product_id.';
     }
     // backfill existing rows from the product's current Product-ID where possible
     if (!columnExists($pdo, 'sales', 'product_sku')) {
-        $pdo->exec("ALTER TABLE sales ADD COLUMN product_sku VARCHAR(50) NOT NULL COMMENT 'Product ID' AFTER product_name");
-        $pdo->exec("UPDATE sales s LEFT JOIN products p ON s.product_id = p.id SET s.product_sku = COALESCE(p.product_id, '') WHERE s.product_sku = ''");
+        $pdo->exec($sql['sales.product_sku']);
+        $pdo->exec($sql['sales.product_sku_backfill']);
         $messages[] = 'Added product_sku column to sales.';
     }
 
@@ -61,11 +64,11 @@ function migrateSchema(PDO $pdo): array
                AND COLUMN_NAME = 'product_id' AND REFERENCED_TABLE_NAME = 'products'"
         )->fetchColumn();
         if ($oldFk) {
-            $pdo->exec("ALTER TABLE `$table` DROP FOREIGN KEY `$oldFk`");
+            $pdo->exec(str_replace(['{TABLE}', '{FK}'], [$table, $oldFk], $sql['convert.drop_fk']));
         }
-        $pdo->exec("UPDATE `$table` t JOIN products p ON t.product_id = p.id SET t.product_id = p.product_id");
+        $pdo->exec(str_replace('{TABLE}', $table, $sql['convert.update']));
         $nullability = ($table === 'movements') ? 'NOT NULL' : 'NULL';
-        $pdo->exec("ALTER TABLE `$table` MODIFY product_id VARCHAR(50) $nullability");
+        $pdo->exec(str_replace(['{TABLE}', '{NULLABILITY}'], [$table, $nullability], $sql['convert.modify']));
         $messages[] = "Converted $table.product_id to store Product-ID codes.";
     }
 

@@ -40,3 +40,45 @@ function constraintExists(PDO $pdo, string $table, string $constraint): bool
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$table' AND CONSTRAINT_NAME = '$constraint'"
     )->fetchColumn();
 }
+
+/**
+ * Load executable statements from a .sql file in the sql/ folder.
+ * Strips -- comment lines, then splits on semicolons.
+ */
+function sqlStatements(string $file): array
+{
+    $path = __DIR__ . '/../sql/' . $file;
+    if (!is_file($path)) {
+        throw new RuntimeException("SQL file not found: $path");
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES) ?: [];
+    $lines = array_values(array_filter($lines, fn ($line) => !preg_match('/^\s*--/', $line)));
+    $statements = array_filter(array_map('trim', explode(';', implode("\n", $lines))));
+    return array_values($statements);
+}
+
+/**
+ * Load keyed statements from a .sql file. Keys are marked in the file as
+ * "-- [key.name]" comment lines directly above each statement.
+ * Returns [key => statement]. {PLACEHOLDER} tokens are left for the caller.
+ */
+function sqlStatementsByKey(string $file): array
+{
+    $path = __DIR__ . '/../sql/' . $file;
+    if (!is_file($path)) {
+        throw new RuntimeException("SQL file not found: $path");
+    }
+    $content = (string)file_get_contents($path);
+    $keys = [];
+    if (preg_match_all('/--\s*\[([\w.]+)\]\s*\n(.*?);/s', $content, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            $body = trim(preg_replace('/^\s*--.*$/m', '', $match[2]) ?? '');
+            if ($body !== '') {
+                $keys[$match[1]] = $body;
+            }
+        }
+    }
+    return $keys;
+}
+
+

@@ -4,11 +4,13 @@
  * and the default admin. Redirects to login.php on success.
  *
  * Parts live in the install/ folder:
- *   helpers.php      - connection + schema-check helpers
- *   schema.php       - table definitions + createTables()
- *   migrations.php   - upgrades for older installs
- *   foreign_keys.php - connects related tables
+ *   helpers.php      - connection + schema-check helpers + sql/ file loader
+ *   schema.php       - runs sql/01_schema.sql (table creation)
+ *   migrations.php   - runs keyed statements from sql/03_migrations.sql
+ *   foreign_keys.php - runs sql/02_foreign_keys.sql (table connections)
  *   admin.php        - default admin account
+ *
+ * Canonical SQL lives in the sql/ folder (see sql/README.md).
  */
 
 define('INSTALL_APP', true);

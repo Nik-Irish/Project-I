@@ -1,7 +1,9 @@
 <?php
 /**
- * install/foreign_keys.php - connects related tables (same-named columns stay in sync).
- * Included by install.php (which defines INSTALL_APP). Do not open directly.
+ * install/foreign_keys.php - connects related tables (same-named columns
+ * stay in sync). The statements live in sql/02_foreign_keys.sql; this file
+ * only checks and executes them. Included by install.php (which defines
+ * INSTALL_APP). Do not open directly.
  */
 
 if (!defined('INSTALL_APP')) {
@@ -9,28 +11,20 @@ if (!defined('INSTALL_APP')) {
     exit('Direct access not allowed.');
 }
 
-function fkDefinitions(): array
-{
-    // [table, constraint, column, referenced, ON DELETE]
-    return [
-        ['movements',     'fk_movements_product',     'product_id',  'products(product_id)', 'RESTRICT'],
-        ['sales',         'fk_sales_product',         'product_id',  'products(product_id)', 'RESTRICT'],
-        ['sales',         'fk_sales_sku',             'product_sku', 'products(product_id)', 'RESTRICT'],
-        ['notifications', 'fk_notifications_product', 'product_id',  'products(product_id)', 'SET NULL'],
-    ];
-}
-
 function addForeignKeys(PDO $pdo): array
 {
     $messages = [];
-    foreach (fkDefinitions() as [$table, $name, $column, $ref, $onDelete]) {
-        if (constraintExists($pdo, $table, $name)) continue;
-        $pdo->exec(
-            "ALTER TABLE `$table` ADD CONSTRAINT `$name`
-             FOREIGN KEY (`$column`) REFERENCES $ref
-             ON DELETE $onDelete ON UPDATE CASCADE"
-        );
+    foreach (sqlStatements('02_foreign_keys.sql') as $statement) {
+        if (!preg_match('/ALTER TABLE\s+(\w+)\s+ADD CONSTRAINT\s+(\w+)/', $statement, $m)) {
+            continue;
+        }
+        [$table, $name] = [$m[1], $m[2]];
+        if (constraintExists($pdo, $table, $name)) {
+            continue;
+        }
+        $pdo->exec($statement);
         $messages[] = "Added foreign key $name.";
     }
     return $messages;
 }
+
