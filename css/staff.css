@@ -19,7 +19,7 @@
   transform: translateY(-50%);
   border: none;
   background: transparent;
-  color: var(--blue, #3f72af);
+  color: var(--accent, #6366F1);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.25rem 0.5rem;
@@ -30,13 +30,13 @@
 }
 
 .pw-toggle:hover {
-  background: rgba(56, 189, 248, 0.22);
-  color: #f9f7f7;
+  background: rgba(129, 140, 248, 0.22);
+  color: #FAFAFA;
 }
 
 .pw-toggle:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
 }
 
 /* ── Add Staff button full-width ─────────────────────────────────────────── */
@@ -49,21 +49,21 @@
 
 /* ── Add Staff card ──────────────────────────────────────────────────────── */
 .add-staff-card {
-  background: #f5fffa;
-  border-color: #dbe2ef;
+  background: #131316;
+  border-color: #A1A1AA;
 }
 .add-staff-card h2,
 .add-staff-card .form-group label {
-  color: #112d4e;
+  color: #FAFAFA;
 }
 .add-staff-card .form-group input {
-  color: #112d4e;
-  background: #eef6ff;
-  border-color: #9fb9d6;
+  color: #FAFAFA;
+  background: #09090B;
+  border-color: #27272A;
 }
 .add-staff-card .form-group input:focus {
-  border-color: #3f72af;
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.2);
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 /* ── Inline edit row ─────────────────────────────────────────────────────── */
@@ -74,22 +74,22 @@
   gap: 0.5rem;
 }
 .editing-row td {
-  background: rgba(63, 114, 175, 0.15);
+  background: rgba(99, 102, 241, 0.15);
 }
 
 .edit-input {
   padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
-  color: var(--white, #f9f7f7);
-  background: #0d263f;
-  border: 1px solid rgba(219, 226, 239, 0.3);
+  color: var(--fg, #FAFAFA);
+  background: #18181B;
+  border: 1px solid rgba(250, 250, 250, 0.3);
   border-radius: 6px;
   outline: none;
   font-family: inherit;
 }
 .edit-input:focus {
-  border-color: var(--blue, #3f72af);
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+  border-color: var(--accent, #6366F1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 .edit-username {
   width: 140px;
@@ -114,19 +114,19 @@
   width: 100%;
   padding: 0.4rem 0.6rem;
   font-size: 0.82rem;
-  color: var(--white, #f9f7f7);
-  background: #0d263f;
-  border: 1px solid rgba(219, 226, 239, 0.3);
+  color: var(--fg, #FAFAFA);
+  background: #18181B;
+  border: 1px solid rgba(250, 250, 250, 0.3);
   border-radius: 6px;
   outline: none;
   font-family: inherit;
 }
 .staff-password-input:focus {
-  border-color: var(--blue, #3f72af);
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+  border-color: var(--accent, #6366F1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 .staff-password-input::placeholder {
-  color: var(--mist, #dbe2ef);
+  color: var(--fg-muted, #A1A1AA);
 }
 
 @media (max-width: 760px) {

@@ -20,7 +20,7 @@ require __DIR__ . '/install/foreign_keys.php';
 require __DIR__ . '/install/admin.php';
 
 // --- configuration --------------------------------------------------------
-
+     
 $host = 'localhost';
 $port = 3306;
 $user = 'root';

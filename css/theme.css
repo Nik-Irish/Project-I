@@ -1,123 +1,110 @@
-/* IMS Nepal - Dashboard: theme palette overrides (load LAST, after base/sidebar/components) */
+/*
+IMS Nepal - theme palette (load LAST, after base/sidebar/components)
+
+60-30-10 rule:
+  60% dominant background  #09090B  (Zinc 950)
+  30% secondary structure  #FAFAFA  (Zinc 50)
+  10% accent interactive   #6366F1  (Indigo 500)
+*/
 
 :root {
-  --navy: #112d4e;
-  --blue: #3f72af;
-  --mist: #dbe2ef;
-  --white: #f9f7f7;
+  --bg: #09090B;                       /* 60% dominant */
+  --surface: #131316;                  /* raised dominant surface */
+  --surface-2: #18181B;                /* highest surface (inputs, popovers) */
+  --border: rgba(250, 250, 250, 0.1);  /* structure lines, from secondary */
+  --fg: #FAFAFA;                       /* 30% secondary: primary text */
+  --fg-muted: #A1A1AA;                 /* 30% secondary: muted text */
+  --accent: #6366F1;                   /* 10% accent: buttons, links, focus */
+  --accent-hover: #4F46E5;
+  --accent-soft: #818CF8;              /* accent text on dark */
 }
 
+/* Dominant background everywhere */
 body {
-  background: var(--navy);
-  color: var(--mist);
+  background: var(--bg);
+  color: var(--fg);
 }
 .sidebar {
-  background: var(--navy);
-  border-color: rgba(219, 226, 239, 0.2);
-}
-.brand,
-.topbar h1,
-.form-card h2 {
-  color: var(--white);
-}
-.brand-link:hover,
-.nav-link.active,
-.stat-value,
-.notif-bell:hover {
-  color: var(--blue);
-}
-.nav-link {
-  color: var(--mist);
-}
-.nav-link:hover {
-  background: rgba(63, 114, 175, 0.2);
-  color: var(--white);
-}
-.nav-link.active {
-  background: rgba(63, 114, 175, 0.35);
+  background: var(--bg);
 }
 .main {
-  background: linear-gradient(160deg, var(--navy) 0%, #1b426c 100%);
+  background: var(--bg);
 }
-.topbar-sub,
-.stat-label,
-.form-hint,
-.empty-state {
-  color: var(--mist);
+
+/* Accent on interactive text */
+.stat-value,
+.brand-link:hover {
+  color: var(--accent-soft);
 }
-.stat-card,
-.table-wrap,
-.form-card {
-  background: rgba(17, 45, 78, 0.92);
-  border-color: rgba(219, 226, 239, 0.2);
-}
+
+/* Primary button: the accent */
 .btn-primary {
-  color: var(--white);
-  background: var(--blue);
+  color: #FAFAFA;
+  background: var(--accent);
 }
 .btn-primary:hover {
-  box-shadow: 0 6px 16px rgba(63, 114, 175, 0.45);
+  background: var(--accent-hover);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
 }
-.btn-secondary {
-  color: var(--white);
-  background: #315f94;
-}
-.btn-secondary:hover {
-  background: var(--blue);
-}
-.btn-ghost {
-  color: var(--mist);
-  border-color: rgba(219, 226, 239, 0.35);
-}
-.btn-ghost:hover {
-  color: var(--white);
-  border-color: var(--blue);
-}
+
+/* Inputs: dominant surface, accent focus ring */
 .search-form input[type="search"],
 .search-form input[type="date"],
 .search-form select,
 .form-group input,
 .form-group textarea,
 .form-group select {
-  color: var(--white);
-  background: #0d263f;
-  border-color: rgba(219, 226, 239, 0.3);
+  color: var(--fg);
+  background: var(--surface-2);
+  border-color: rgba(250, 250, 250, 0.14);
 }
 .search-form input:focus,
 .search-form select:focus,
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(63, 114, 175, 0.3);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
 }
-.section-head {
-  color: var(--mist);
-  background: rgba(13, 38, 63, 0.55);
-  border-color: rgba(219, 226, 239, 0.2);
+.search-form select option,
+.form-group select option {
+  background: var(--surface-2);
+  color: var(--fg);
 }
+
+/* Cards and tables: dominant surfaces, secondary text */
+.stat-card,
+.table-wrap,
+.form-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+.stat-label,
+.topbar-sub,
+.form-hint,
+.empty-state,
+.form-group label,
+.section-head,
 .data-table th {
-  color: var(--mist);
-  background: rgba(13, 38, 63, 0.7);
-  border-color: rgba(219, 226, 239, 0.2);
+  color: var(--fg-muted);
 }
 .data-table td {
-  border-color: rgba(219, 226, 239, 0.12);
+  border-color: rgba(250, 250, 250, 0.08);
 }
 .data-table tbody tr:hover {
-  background: rgba(63, 114, 175, 0.12);
+  background: rgba(99, 102, 241, 0.08);
 }
 .data-table code {
-  color: var(--white);
-  background: rgba(63, 114, 175, 0.25);
+  color: var(--accent-soft);
+  background: rgba(99, 102, 241, 0.15);
 }
-.form-group label {
-  color: var(--mist);
+
+/* Ghost button: secondary outline */
+.btn-ghost {
+  color: var(--fg-muted);
+  border-color: rgba(250, 250, 250, 0.18);
 }
-.stat-card {
-  background: #ffffff;
-  border-color: #dbe2ef;
-}
-.stat-card .stat-label {
-  color: #5b4636;
+.btn-ghost:hover {
+  color: var(--fg);
+  border-color: var(--accent);
 }

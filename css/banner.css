@@ -19,7 +19,7 @@
 }
 
 .notif-banner-title a {
-  color: #38bdf8;
+  color: #818CF8;
   font-size: 0.8rem;
   text-decoration: none;
 }
@@ -33,11 +33,11 @@
 
 .notif-banner-list li {
   font-size: 0.8rem;
-  color: var(--mist, #dbe2ef);
+  color: var(--fg-muted, #A1A1AA);
 }
 
 .notif-banner-list li a {
-  color: #38bdf8;
+  color: #818CF8;
   margin-left: 0.3rem;
   font-size: 0.75rem;
 }

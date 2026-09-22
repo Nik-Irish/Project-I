@@ -11,16 +11,16 @@
 
 .cell-desc {
   font-size: 0.7rem;
-  color: #64748b;
+  color: #71717A;
   margin-top: 0.15rem;
 }
 
 .link-name {
-  color: #e2e8f0;
+  color: #FAFAFA;
   text-decoration: none;
 }
 .link-name:hover {
-  color: var(--blue, #3f72af);
+  color: var(--accent, #6366F1);
   text-decoration: underline;
 }
 
@@ -39,8 +39,8 @@
   z-index: 30;
   max-height: 220px;
   overflow-y: auto;
-  background: #1e293b;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #18181B;
+  border: 1px solid rgba(250, 250, 250, 0.35);
   border-radius: 8px;
   margin-top: 4px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
@@ -53,8 +53,8 @@
   padding: 0.5rem 0.75rem;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  color: #e2e8f0;
+  border-bottom: 1px solid rgba(250, 250, 250, 0.15);
+  color: #FAFAFA;
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
@@ -74,6 +74,6 @@
 .pid-meta {
   display: block;
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: #A1A1AA;
   margin-top: 2px;
 }

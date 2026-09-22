@@ -4,8 +4,8 @@
 .sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: rgba(30, 41, 59, 0.98);
-  border-right: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(24, 24, 27, 0.98);
+  border-right: 1px solid rgba(250, 250, 250, 0.12);
   display: flex;
   flex-direction: column;
   padding: 1rem 0;
@@ -19,8 +19,8 @@
   padding: 0 1rem 1.25rem;
   font-weight: 700;
   font-size: 1rem;
-  color: #f8fafc;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #FAFAFA;
+  border-bottom: 1px solid rgba(250, 250, 250, 0.1);
   margin-bottom: 0.75rem;
   letter-spacing: 0.04em;
 }
@@ -31,7 +31,7 @@
 }
 
 .brand-link:hover {
-  color: #38bdf8;
+  color: #818CF8;
 }
 
 .nav {
@@ -47,7 +47,7 @@
   align-items: center;
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
-  color: #94a3b8;
+  color: #A1A1AA;
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
@@ -57,21 +57,21 @@
 }
 
 .nav-link:hover {
-  background: rgba(56, 189, 248, 0.08);
-  color: #e2e8f0;
+  background: rgba(129, 140, 248, 0.08);
+  color: #FAFAFA;
 }
 .nav-link.active {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
+  background: rgba(129, 140, 248, 0.15);
+  color: #818CF8;
 }
 
 .sidebar-footer {
   padding: 0.5rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  border-top: 1px solid rgba(250, 250, 250, 0.1);
 }
 
 .logout {
-  color: #64748b;
+  color: #71717A;
 }
 
 .nav-badge {
@@ -98,10 +98,10 @@
   padding: 0.45rem 0.75rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: #A1A1AA;
   text-decoration: none;
-  background: rgba(30, 41, 59, 0.95);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(24, 24, 27, 0.95);
+  border: 1px solid rgba(250, 250, 250, 0.2);
   border-radius: 8px;
   flex-shrink: 0;
   transition:
@@ -110,8 +110,8 @@
 }
 
 .notif-bell:hover {
-  border-color: #38bdf8;
-  color: #38bdf8;
+  border-color: #818CF8;
+  color: #818CF8;
 }
 
 .bell-count {
