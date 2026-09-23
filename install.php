@@ -1,18 +1,4 @@
 <?php
-/**
- * install.php - Run once to create the database, tables, foreign keys,
- * and the default admin. Redirects to login.php on success.
- *
- * Parts live in the install/ folder:
- *   helpers.php      - connection + schema-check helpers + sql/ file loader
- *   schema.php       - runs sql/01_schema.sql (table creation)
- *   migrations.php   - runs keyed statements from sql/03_migrations.sql
- *   foreign_keys.php - runs sql/02_foreign_keys.sql (table connections)
- *   admin.php        - default admin account
- *
- * Canonical SQL lives in the sql/ folder (see sql/README.md).
- */
-
 define('INSTALL_APP', true);
 
 require __DIR__ . '/install/helpers.php';
@@ -20,18 +6,12 @@ require __DIR__ . '/install/schema.php';
 require __DIR__ . '/install/migrations.php';
 require __DIR__ . '/install/foreign_keys.php';
 require __DIR__ . '/install/admin.php';
-
-// --- configuration --------------------------------------------------------
-     
 $host = 'localhost';
 $port = 3306;
 $user = 'root';
 $pass = '';
 $dbname = 'ims';
 $adminEmail = 'nikrishdulal01@gmail.com';
-
-// --- run installation ------------------------------------------------------
-
 $messages = [];
 $ok = true;
 

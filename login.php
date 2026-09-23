@@ -1,13 +1,4 @@
 <?php
-/**
- * login.php - Entry point: Login / Register / Forgot password.
- *
- * Thin controller (same layout as dashboard.php):
- *   login/bootstrap.php          session, Mailer, DB, mode & reset-stage setup
- *   login/actions/*.php          POST handlers (one per branch)
- *   login/views/login_page.php   full HTML page
- */
-
 define('LOGIN_CONTROLLER', true);
 
 require __DIR__ . '/login/bootstrap.php';
